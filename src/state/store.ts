@@ -89,8 +89,7 @@ const createNewScreen = (screenNumber: number): Screen => {
 }
 
 // FORCE REFRESH - PREVENT CACHE
-console.log('🔥 STORE INIT - FORCING FEEDBACK SCREEN')
-console.log('🔥 Feedback screen:', createFeedbackScreen())
+
 
 export const useFlowStore = create<FlowState>((set, get) => ({
   screens: [{

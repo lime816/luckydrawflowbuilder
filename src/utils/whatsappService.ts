@@ -982,9 +982,20 @@ export class WhatsAppService {
     try {
       console.log(`Sending flow activation message for flow ${flowId} to ${phoneNumber}`);
       
+      // First check if the flow exists and get its status
+      const flowDetails = await this.getFlowDetails(flowId);
+      if (!flowDetails) {
+        throw new Error(`Flow ${flowId} not found`);
+      }
+      
+      const isPublished = flowDetails.status === 'PUBLISHED';
+      const mode = isPublished ? 'published' : 'draft';
+      
+      console.log(`Flow ${flowId} status: ${flowDetails.status}, using mode: ${mode}`);
+      
       const payload = {
         messaging_product: "whatsapp",
-        to: phoneNumber,
+        to: phoneNumber.replace(/\+/g, ''), // Remove + prefix
         type: "interactive",
         interactive: {
           type: "flow",
@@ -1004,7 +1015,8 @@ export class WhatsAppService {
               flow_message_version: "3",
               flow_token: `token_${Date.now()}`,
               flow_id: flowId,
-              flow_cta: "Start"
+              flow_cta: "Start",
+              mode: mode // Use 'published' for published flows, 'draft' for draft flows
             }
           }
         }
@@ -1035,6 +1047,7 @@ export class WhatsAppService {
       throw error;
     }
   }
+
 }
 
 // Create a singleton instance

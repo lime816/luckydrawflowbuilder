@@ -1,9 +1,11 @@
 import React, { useState, useCallback } from 'react'
-import { Moon, Sun, Download, Plus, Code2, MessageCircle, Send } from 'lucide-react'
+import { Moon, Sun, Download, Plus, Code2, MessageCircle, Send, QrCode } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ScreenDesigner from './screens/ScreenDesigner'
 import JsonPreviewPanel from './components/JsonPreviewPanel'
 import WhatsAppPreview from './components/WhatsAppPreview'
+import QRCodeGenerator from './components/QRCodeGenerator'
+import QRFlowInitiator from './components/QRFlowInitiator'
 import { useFlowStore } from './state/store'
 import { buildFlowJson } from './utils/jsonBuilder'
 import { downloadText } from './utils/fileWriter'
@@ -15,10 +17,7 @@ import { ToastData, ToastType } from './components/Toast'
 export default function App() {
   const { screens, addScreen } = useFlowStore()
   
-  // FORCE DEBUG - CHECK WHAT SCREENS WE HAVE
-  console.log('🔥 APP SCREENS:', screens)
-  console.log('🔥 FIRST SCREEN ID:', screens[0]?.id)
-  console.log('🔥 FIRST SCREEN TITLE:', screens[0]?.title)
+
 
   const [showJsonPreview, setShowJsonPreview] = useState(false)
   const [showWhatsAppPreview, setShowWhatsAppPreview] = useState(false)
@@ -34,21 +33,38 @@ export default function App() {
   const [selectedFlow, setSelectedFlow] = useState<any>(null)
   const [customMessage, setCustomMessage] = useState('Please complete this form to continue with your lucky draw registration.')
   const [showFlowSelectionDialog, setShowFlowSelectionDialog] = useState(false)
+  const [showQRCodePanel, setShowQRCodePanel] = useState(false)
+  const [activeFlowId, setActiveFlowId] = useState<string>('')
   const [toasts, setToasts] = useState<ToastData[]>([])
+  const [flowActivationMessages, setFlowActivationMessages] = useState<Record<string, string>>({})
+  
+  // Get business phone number from environment variables
+  const businessPhoneNumber = import.meta.env.VITE_WHATSAPP_BUSINESS_NUMBER || '15550617327'
+
+  // Load stored activation messages from localStorage on component mount
+  React.useEffect(() => {
+    const stored = localStorage.getItem('flowActivationMessages')
+    if (stored) {
+      try {
+        setFlowActivationMessages(JSON.parse(stored))
+      } catch (error) {
+        console.error('Error loading stored activation messages:', error)
+      }
+    }
+  }, [])
+
+  // Save activation messages to localStorage whenever they change
+  React.useEffect(() => {
+    localStorage.setItem('flowActivationMessages', JSON.stringify(flowActivationMessages))
+  }, [flowActivationMessages])
 
   const showToast = useCallback((type: ToastType, title: string, message: string, duration?: number) => {
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 9)
     const newToast: ToastData = { id, type, title, message, duration }
-    console.log('🔔 SHOWING TOAST:', { type, title, message, id })
-    setToasts(prev => {
-      const updated = [...prev, newToast]
-      console.log('🔔 TOASTS ARRAY UPDATED:', updated)
-      return updated
-    })
+    setToasts(prev => [...prev, newToast])
   }, [])
 
   const removeToast = useCallback((id: string) => {
-    console.log('🗑️ REMOVING TOAST:', id)
     setToasts(prev => prev.filter(toast => toast.id !== id))
   }, [])
 
@@ -100,7 +116,16 @@ export default function App() {
       const result = await response.json()
       console.log('✅ Flow structure created in DRAFT:', result)
       
-      showToast('success', 'Flow Created in DRAFT!', `Flow Name: ${flowName.trim()}\nFlow ID: ${result.id}\nStatus: DRAFT\n\n📋 Check console for generated JSON\n\n🔧 Next Steps:\n1. Copy JSON from console\n2. Go to WhatsApp Business Manager\n3. Upload JSON manually\n4. Test and publish!`, 10000)
+      // Store the activation message for this flow
+      if (result.id) {
+        setFlowActivationMessages(prev => ({
+          ...prev,
+          [result.id]: customMessage.trim() || 'Please complete this form to continue.'
+        }))
+        console.log('💾 Stored activation message for flow:', result.id, customMessage.trim())
+      }
+      
+      showToast('success', 'Flow Created in DRAFT!', `Flow Name: ${flowName.trim()}\nFlow ID: ${result.id}\nStatus: DRAFT\nActivation Message: "${customMessage.trim() || 'Please complete this form to continue.'}"\n\n📋 Check console for generated JSON\n\n🔧 Next Steps:\n1. Copy JSON from console\n2. Go to WhatsApp Business Manager\n3. Upload JSON manually\n4. Test and publish!`, 10000)
       console.log('📋 Generated JSON:', JSON.stringify(builderJson, null, 2))
       
     } catch (error) {
@@ -249,6 +274,15 @@ ${JSON.stringify(builderJson, null, 2)}
       const flowResult = await createResponse.json()
       console.log('✅ Flow structure created:', flowResult)
       console.log('🆔 Flow ID:', flowResult.id)
+
+      // Store the activation message for this flow
+      if (flowResult.id) {
+        setFlowActivationMessages(prev => ({
+          ...prev,
+          [flowResult.id]: customMessage.trim() || 'Please complete this form to continue.'
+        }))
+        console.log('💾 Stored activation message for flow:', flowResult.id, customMessage.trim())
+      }
 
       // STEP 3: Try multiple upload methods to ensure success
       console.log('📤 Step 2: Uploading flow JSON as assets...')
@@ -600,18 +634,60 @@ Preview URL: ${result.preview_url || 'Not available'}
     }
   }
 
+  // Helper function to send active flow activation
+  const handleSendActiveFlow = async (customerPhoneNumber: string) => {
+    if (!customerPhoneNumber.trim()) {
+      showToast('warning', 'Phone Number Required', 'Please enter the customer\'s phone number')
+      return
+    }
+
+    if (!activeFlowId) {
+      showToast('warning', 'No Active Flow', 'Please select an active flow first in the QR Code panel')
+      return
+    }
+
+    try {
+      const service = new WhatsAppService()
+      const activeFlow = allFlows.find(f => f.id === activeFlowId)
+      
+      const result = await service.sendFlowActivationMessage(
+        customerPhoneNumber, 
+        activeFlowId, 
+        customMessage.trim() || "Thank you for contacting us! Please complete this form to continue."
+      )
+      
+      showToast('success', 'Active Flow Sent!', `Flow: ${activeFlow?.name || 'Selected Flow'}\nFlow ID: ${activeFlowId}\nMessage ID: ${result.messages[0].id}\nSent to: +${customerPhoneNumber}\n\n✅ Customer will now receive the active flow and can interact with it!`, 10000)
+      
+    } catch (error) {
+      console.error('Error sending active flow:', error)
+      
+      let errorMessage = 'Unknown error'
+      let errorTitle = 'Error Sending Active Flow'
+      
+      if (error instanceof Error) {
+        try {
+          const errorData = JSON.parse(error.message)
+          if (errorData.error?.code === 10) {
+            errorTitle = '❌ Permission Error'
+            errorMessage = `WhatsApp API Permission Issue\n\n${errorData.error.message}\n\nThis means:\n• Your access token lacks messaging permissions\n• Need to add 'whatsapp_business_messaging' scope\n• Contact your WhatsApp Business API provider\n• Or regenerate token with proper permissions`
+          } else {
+            errorMessage = errorData.error?.message || error.message
+          }
+        } catch {
+          errorMessage = error.message
+        }
+      }
+      
+      showToast('error', errorTitle, `${errorMessage}\n\nMake sure:\n• The active flow is approved/published\n• Phone number is correct\n• Access token has proper permissions`, 12000)
+    }
+  }
+
   React.useEffect(() => {
     // Set dark mode by default
     document.documentElement.classList.add('dark')
   }, [])
 
-  React.useEffect(() => {
-    // Test toast on app load
-    setTimeout(() => {
-      console.log('🔥 TESTING TOAST ON APP LOAD')
-      showToast('info', 'App Loaded', 'WhatsApp Flow Builder is ready!', 3000)
-    }, 1000)
-  }, [showToast])
+
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -648,21 +724,7 @@ Preview URL: ${result.preview_url || 'Not available'}
                 <span className="hidden sm:inline">Add Screen</span>
               </button>
 
-              <button
-                onClick={() => {
-                  console.log('🔥 TEST BUTTON CLICKED!')
-                  showToast('success', 'Test Toast', 'This is a test toast notification!', 5000)
-                  showToast('error', 'Error Test', 'This is an error toast!', 5000)
-                  showToast('warning', 'Warning Test', 'This is a warning toast!', 5000)
-                  showToast('info', 'Info Test', 'This is an info toast!', 5000)
-                }}
-                className="btn-primary flex items-center gap-2 bg-red-500 hover:bg-red-600"
-                title="Test toast notifications"
-              >
-                🍞
-                <span className="hidden sm:inline">Test Toasts</span>
-              </button>
-              
+
 
 
               <button
@@ -714,8 +776,30 @@ Preview URL: ${result.preview_url || 'Not available'}
                 <span className="hidden sm:inline">Manage Flows</span>
               </button>
 
+              <button
+                onClick={() => setShowQRCodePanel(!showQRCodePanel)}
+                className={`btn-secondary flex items-center gap-2 ${showQRCodePanel ? 'bg-whatsapp-500/20' : ''}`}
+                title="Generate Flow QR Code"
+              >
+                <QrCode className="w-4 h-4" />
+                <span className="hidden sm:inline">Flow QR</span>
+              </button>
 
-
+              {activeFlowId && (
+                <button
+                  onClick={() => {
+                    const customerPhone = prompt('Enter customer phone number (with country code, e.g., 918281348343):')
+                    if (customerPhone) {
+                      handleSendActiveFlow(customerPhone)
+                    }
+                  }}
+                  className="btn-primary flex items-center gap-2 bg-whatsapp-500 hover:bg-whatsapp-600"
+                  title="Send active flow to a customer"
+                >
+                  <Send className="w-4 h-4" />
+                  <span className="hidden sm:inline">Send Active Flow</span>
+                </button>
+              )}
 
             </div>
           </div>
@@ -911,6 +995,258 @@ Preview URL: ${result.preview_url || 'Not available'}
         )}
       </AnimatePresence>
 
+      {/* QR Code Generator Panel */}
+      <AnimatePresence>
+        {showQRCodePanel && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 p-4 overflow-y-auto"
+            onClick={() => setShowQRCodePanel(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-4xl w-full my-8"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex flex-col">
+                <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-slate-800 z-10">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-whatsapp-500 to-whatsapp-600 rounded-xl flex items-center justify-center">
+                      <QrCode className="w-6 h-6 text-white" />
+                    </div>
+                    WhatsApp Flow QR Code Generator
+                  </h3>
+                  <button
+                    onClick={() => setShowQRCodePanel(false)}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <span className="sr-only">Close</span>
+                    ✕
+                  </button>
+                </div>
+                
+                <div className="p-6">
+                  <div className="max-w-2xl mx-auto">
+                    <QRFlowInitiator 
+                      businessPhoneNumber={businessPhoneNumber}
+                      activeFlowId={activeFlowId}
+                      allFlows={allFlows}
+                      flowActivationMessages={flowActivationMessages}
+                      onFlowTrigger={handleSendActiveFlow}
+                      onCopySuccess={() => showToast('success', 'Copied!', 'WhatsApp link copied to clipboard', 3000)}
+                    />
+                    
+                    {/* Active Flow Selection */}
+                    <div className="mt-8 bg-slate-50 dark:bg-slate-800 p-6 rounded-lg border">
+                      <h4 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                        <MessageCircle className="w-5 h-5 text-whatsapp-500" />
+                        QR Code Flow Configuration
+                      </h4>
+                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                        Configure which flow will be automatically activated when customers scan your QR code. 
+                        QR codes will use the exact activation message you configured when creating each flow.
+                      </p>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                            Select Flow for QR Code
+                          </label>
+                          <select
+                            value={activeFlowId}
+                            onChange={(e) => setActiveFlowId(e.target.value)}
+                            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-whatsapp-500 focus:border-transparent"
+                          >
+                            <option value="">No active flow selected</option>
+                            {allFlows.map(flow => (
+                              <option key={flow.id} value={flow.id}>
+                                {flow.name || 'Unnamed Flow'} ({flow.id}) - {flow.status}
+                              </option>
+                            ))}
+                          </select>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                            This flow will be automatically activated when users scan the QR code
+                          </p>
+                        </div>
+                        
+                        {activeFlowId && (
+                          <div className="bg-whatsapp-50 dark:bg-whatsapp-900/20 p-4 rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-3 h-3 bg-whatsapp-500 rounded-full"></div>
+                              <span className="text-sm font-medium text-whatsapp-800 dark:text-whatsapp-200">
+                                Active Flow Selected
+                              </span>
+                            </div>
+                            {(() => {
+                              const selectedFlow = allFlows.find(f => f.id === activeFlowId)
+                              return selectedFlow ? (
+                                <div className="text-xs text-whatsapp-700 dark:text-whatsapp-300 space-y-1">
+                                  <p><strong>Name:</strong> {selectedFlow.name || 'Unnamed'}</p>
+                                  <p><strong>ID:</strong> {selectedFlow.id}</p>
+                                  <p><strong>Status:</strong> {selectedFlow.status}</p>
+                                  <p><strong>Categories:</strong> {selectedFlow.categories?.join(', ') || 'None'}</p>
+                                  {selectedFlow.created_time && (
+                                    <p><strong>Created:</strong> {new Date(selectedFlow.created_time * 1000).toLocaleDateString()}</p>
+                                  )}
+                                </div>
+                              ) : null
+                            })()} 
+                            <div className="mt-3 p-3 bg-white dark:bg-slate-700 rounded border">
+                              <p className="text-xs font-medium text-slate-800 dark:text-slate-200 mb-1">Smart Activation:</p>
+                              <p className="text-xs text-slate-600 dark:text-slate-400">
+                                QR codes automatically generate contextual activation messages based on your flow name. 
+                                The flow activates immediately when customers scan the code - no manual intervention needed!
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleGetAllFlows}
+                            disabled={isLoadingFlows}
+                            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg disabled:opacity-50 flex items-center gap-2 text-sm"
+                          >
+                            {isLoadingFlows ? 'Loading...' : 'Refresh Flows'}
+                          </button>
+                          
+                          {activeFlowId && (
+                            <button
+                              onClick={() => handleFlowDetails(activeFlowId)}
+                              className="px-4 py-2 bg-whatsapp-500 hover:bg-whatsapp-600 text-white rounded-lg flex items-center gap-2 text-sm"
+                            >
+                              View Details
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Flow Debugging Section */}
+                    {activeFlowId && (
+                      <div className="mt-8 bg-red-50 dark:bg-red-900/20 p-6 rounded-lg border border-red-200 dark:border-red-800">
+                        <h4 className="font-semibold text-red-900 dark:text-red-200 mb-4 flex items-center gap-2">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                          </svg>
+                          Flow Not Working? Debug Information
+                        </h4>
+                        
+                        {(() => {
+                          const selectedFlow = allFlows.find(f => f.id === activeFlowId)
+                          if (!selectedFlow) return null
+                          
+                          const isPublished = selectedFlow.status === 'PUBLISHED'
+                          const isDraft = selectedFlow.status === 'DRAFT'
+                          
+                          return (
+                            <div className="space-y-3 text-sm">
+                              <div className="flex items-start gap-3">
+                                <div className={`w-4 h-4 rounded-full flex-shrink-0 mt-0.5 ${isPublished ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                                <div>
+                                  <p className="font-medium text-red-800 dark:text-red-200">
+                                    Flow Status: <span className={isPublished ? 'text-green-600' : 'text-red-600'}>{selectedFlow.status}</span>
+                                  </p>
+                                  {isDraft && (
+                                    <p className="text-red-700 dark:text-red-300 mt-1">
+                                      ❌ <strong>Issue:</strong> Flow is in DRAFT mode. DRAFT flows only work for test numbers and the business owner.
+                                    </p>
+                                  )}
+                                  {isPublished && (
+                                    <p className="text-green-700 dark:text-green-300 mt-1">
+                                      ✅ Flow is PUBLISHED and should work for all users.
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                              
+                              <div className="bg-yellow-50 dark:bg-yellow-900/30 p-4 rounded border border-yellow-200 dark:border-yellow-700">
+                                <p className="font-medium text-yellow-800 dark:text-yellow-200 mb-2">Common Flow Issues:</p>
+                                <ul className="text-yellow-700 dark:text-yellow-300 space-y-1 text-xs">
+                                  <li>• <strong>DRAFT Status:</strong> Only works for business owner and test numbers</li>
+                                  <li>• <strong>Missing Approval:</strong> Flow needs WhatsApp/Facebook approval to work for all users</li>
+                                  <li>• <strong>Token Permissions:</strong> Access token needs 'whatsapp_business_messaging' scope</li>
+                                  <li>• <strong>24-Hour Rule:</strong> Need template message or user-initiated conversation</li>
+                                  <li>• <strong>Flow Configuration:</strong> Flow JSON might have validation errors</li>
+                                </ul>
+                              </div>
+                              
+                              <div className="flex gap-2 mt-4">
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      const service = new WhatsAppService()
+                                      const result = await service.sendFlowActivationMessage(
+                                        phoneNumber || '1234567890', 
+                                        activeFlowId, 
+                                        "🔧 DEBUG TEST: This is a test message to check if flow sending works."
+                                      )
+                                      showToast('success', 'Debug Test Sent!', `Test message sent successfully!\nMessage ID: ${result.messages?.[0]?.id}\nIf you received this, the flow system is working.`, 8000)
+                                    } catch (error: any) {
+                                      console.error('Debug test error:', error)
+                                      showToast('error', 'Debug Test Failed', `Error details:\n${error.message}\n\nThis shows what's wrong with your flow configuration.`, 10000)
+                                    }
+                                  }}
+                                  className="px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded text-xs font-medium"
+                                  disabled={!phoneNumber}
+                                >
+                                  🔧 Debug Test Flow
+                                </button>
+                                
+                                {isDraft && (
+                                  <button
+                                    onClick={async () => {
+                                      try {
+                                        const service = new WhatsAppService()
+                                        await service.publishFlow(activeFlowId)
+                                        showToast('success', 'Flow Published!', 'Flow has been published successfully! It will now work for all users (may take a few minutes to activate).', 8000)
+                                        // Refresh flows to update status
+                                        handleGetAllFlows()
+                                      } catch (error: any) {
+                                        console.error('Publish error:', error)
+                                        showToast('error', 'Publish Failed', `Failed to publish flow:\n${error.message}\n\nMake sure your flow has no validation errors and meets WhatsApp's requirements.`, 10000)
+                                      }
+                                    }}
+                                    className="px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded text-xs font-medium"
+                                  >
+                                    🚀 Publish Flow
+                                  </button>
+                                )}
+                                
+                                <button
+                                  onClick={() => {
+                                    const debugInfo = {
+                                      flowId: activeFlowId,
+                                      flowStatus: selectedFlow.status,
+                                      phoneNumberId: import.meta.env.VITE_WHATSAPP_PHONE_NUMBER_ID,
+                                      hasAccessToken: !!import.meta.env.VITE_WHATSAPP_ACCESS_TOKEN,
+                                      businessAccountId: import.meta.env.VITE_WHATSAPP_BUSINESS_ACCOUNT_ID
+                                    }
+                                    console.log('🔧 Flow Debug Info:', debugInfo)
+                                    showToast('info', 'Debug Info Logged', 'Check browser console (F12) for technical details', 5000)
+                                  }}
+                                  className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs font-medium"
+                                >
+                                  📋 Log Debug Info
+                                </button>
+                              </div>
+                            </div>
+                          )
+                        })()}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Send Flow Dialog */}
       <AnimatePresence>
         {showSendDialog && (
@@ -970,16 +1306,19 @@ Preview URL: ${result.preview_url || 'Not available'}
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Custom Activation Message
+                    QR Code Activation Message
                   </label>
                   <textarea
                     value={customMessage}
                     onChange={(e) => setCustomMessage(e.target.value)}
-                    placeholder="Enter the message that will activate your flow..."
+                    placeholder="This message will be sent when users scan your QR code..."
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white resize-none"
                     disabled={isSending}
                   />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    💡 This message will automatically activate your selected flow when customers scan the QR code
+                  </p>
                   <div className="flex gap-2 mt-2 flex-wrap">
                     <button
                       onClick={() => setCustomMessage('🎉 Welcome to our Lucky Draw! Please complete this form to participate and win exciting prizes!')}
