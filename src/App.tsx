@@ -1,11 +1,12 @@
 import React, { useState, useCallback } from 'react'
-import { Moon, Sun, Download, Plus, Code2, MessageCircle, Send, QrCode } from 'lucide-react'
+import { Moon, Sun, Download, Plus, Code2, MessageCircle, Send, QrCode, Globe } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ScreenDesigner from './screens/ScreenDesigner'
 import JsonPreviewPanel from './components/JsonPreviewPanel'
 import WhatsAppPreview from './components/WhatsAppPreview'
 import QRCodeGenerator from './components/QRCodeGenerator'
 import QRFlowInitiator from './components/QRFlowInitiator'
+import WebhookSetup from './components/WebhookSetup'
 import { useFlowStore } from './state/store'
 import { buildFlowJson } from './utils/jsonBuilder'
 import { downloadText } from './utils/fileWriter'
@@ -34,6 +35,7 @@ export default function App() {
   const [customMessage, setCustomMessage] = useState('Please complete this form to continue with your lucky draw registration.')
   const [showFlowSelectionDialog, setShowFlowSelectionDialog] = useState(false)
   const [showQRCodePanel, setShowQRCodePanel] = useState(false)
+  const [showWebhookSetup, setShowWebhookSetup] = useState(false)
   const [activeFlowId, setActiveFlowId] = useState<string>('')
   const [toasts, setToasts] = useState<ToastData[]>([])
   const [flowActivationMessages, setFlowActivationMessages] = useState<Record<string, string>>({})
@@ -785,6 +787,15 @@ Preview URL: ${result.preview_url || 'Not available'}
                 <span className="hidden sm:inline">Flow QR</span>
               </button>
 
+              <button
+                onClick={() => setShowWebhookSetup(!showWebhookSetup)}
+                className={`btn-secondary flex items-center gap-2 ${showWebhookSetup ? 'bg-blue-500/20' : ''}`}
+                title="Webhook Setup & Backend Integration"
+              >
+                <Globe className="w-4 h-4" />
+                <span className="hidden sm:inline">Webhooks</span>
+              </button>
+
               {activeFlowId && (
                 <button
                   onClick={() => {
@@ -1240,6 +1251,49 @@ Preview URL: ${result.preview_url || 'Not available'}
                       </div>
                     )}
                   </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Webhook Setup Panel */}
+      <AnimatePresence>
+        {showWebhookSetup && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 p-4 overflow-y-auto"
+            onClick={() => setShowWebhookSetup(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-6xl w-full my-8"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex flex-col">
+                <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-slate-800 z-10">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                      <Globe className="w-6 h-6 text-white" />
+                    </div>
+                    Webhook Setup & Backend Integration
+                  </h3>
+                  <button
+                    onClick={() => setShowWebhookSetup(false)}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <span className="sr-only">Close</span>
+                    ✕
+                  </button>
+                </div>
+                
+                <div className="p-6">
+                  <WebhookSetup flows={allFlows} />
                 </div>
               </div>
             </motion.div>
