@@ -224,6 +224,34 @@ class BackendApiService {
     }
   }
 
+  async registerFlow(flowId: string, flowName: string, activationMessage: string, autoCreateTrigger: boolean = true): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/whatsapp/register-flow`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          flowId, 
+          flowName, 
+          activationMessage,
+          autoCreateTrigger
+        })
+      })
+      
+      const result: BackendResponse<any> = await response.json()
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to register flow')
+      }
+      
+      return result.data
+    } catch (error) {
+      console.error('Error registering flow:', error)
+      throw error
+    }
+  }
+
   // Health Check
   async checkHealth(): Promise<any> {
     console.log(`🔗 Checking health at: ${this.baseUrl}/health`)

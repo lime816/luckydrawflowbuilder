@@ -12,6 +12,7 @@ import { buildFlowJson } from './utils/jsonBuilder'
 import { downloadText } from './utils/fileWriter'
 import { sendTestFlow } from './utils/whatsappSender'
 import { WhatsAppService } from './utils/whatsappService'
+import { backendApiService } from './utils/backendApiService'
 import ToastContainer from './components/ToastContainer'
 import { ToastData, ToastType } from './components/Toast'
 
@@ -132,11 +133,28 @@ export default function App() {
       
       // Store the activation message for this flow
       if (result.id) {
+        const activationMsg = customMessage.trim() || 'Please complete this form to continue.'
         setFlowActivationMessages(prev => ({
           ...prev,
-          [result.id]: customMessage.trim() || 'Please complete this form to continue.'
+          [result.id]: activationMsg
         }))
-        console.log('💾 Stored activation message for flow:', result.id, customMessage.trim())
+        console.log('💾 Stored activation message for flow:', result.id, activationMsg)
+
+        // Auto-create webhook trigger for this flow
+        try {
+          await backendApiService.registerFlow(
+            result.id,
+            flowName.trim(),
+            activationMsg,
+            true // auto-create trigger
+          )
+          console.log('🎯 Auto-created webhook trigger for flow:', result.id)
+          showToast('success', 'Webhook Trigger Created!', `Automatic trigger created for keyword: "${activationMsg}"`, 3000)
+        } catch (triggerError) {
+          console.error('Failed to auto-create trigger:', triggerError)
+          const errorMsg = triggerError instanceof Error ? triggerError.message : 'Unknown error'
+          showToast('warning', 'Trigger Creation Failed', `Flow created but couldn't create webhook trigger: ${errorMsg}`, 5000)
+        }
       }
       
       showToast('success', 'Flow Created in DRAFT!', `Flow Name: ${flowName.trim()}\nFlow ID: ${result.id}\nStatus: DRAFT\nActivation Message: "${customMessage.trim() || 'Please complete this form to continue.'}"\n\n📋 Check console for generated JSON\n\n🔧 Next Steps:\n1. Copy JSON from console\n2. Go to WhatsApp Business Manager\n3. Upload JSON manually\n4. Test and publish!`, 10000)
@@ -291,11 +309,28 @@ ${JSON.stringify(builderJson, null, 2)}
 
       // Store the activation message for this flow
       if (flowResult.id) {
+        const activationMsg = customMessage.trim() || 'Please complete this form to continue.'
         setFlowActivationMessages(prev => ({
           ...prev,
-          [flowResult.id]: customMessage.trim() || 'Please complete this form to continue.'
+          [flowResult.id]: activationMsg
         }))
-        console.log('💾 Stored activation message for flow:', flowResult.id, customMessage.trim())
+        console.log('💾 Stored activation message for flow:', flowResult.id, activationMsg)
+
+        // Auto-create webhook trigger for this flow
+        try {
+          await backendApiService.registerFlow(
+            flowResult.id,
+            flowName.trim(),
+            activationMsg,
+            true // auto-create trigger
+          )
+          console.log('🎯 Auto-created webhook trigger for flow:', flowResult.id)
+          showToast('success', 'Webhook Trigger Created!', `Automatic trigger created for keyword: "${activationMsg}"`, 3000)
+        } catch (triggerError) {
+          console.error('Failed to auto-create trigger:', triggerError)
+          const errorMsg = triggerError instanceof Error ? triggerError.message : 'Unknown error'
+          showToast('warning', 'Trigger Creation Failed', `Flow created but couldn't create webhook trigger: ${errorMsg}`, 5000)
+        }
       }
 
       // STEP 3: Try multiple upload methods to ensure success
