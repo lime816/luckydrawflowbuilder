@@ -147,24 +147,32 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
 
     setIsTestingWebhook(true)
     try {
-      // If a specific flow is selected, send flow information via text message (safer for testing)
       const selectedFlow = flows.find(flow => flow.id === selectedFlowForTest)
       if (selectedFlow) {
-        // Instead of sending complex flow structure, send a simple message about the flow
-        const flowMessage = `🚀 Flow Test: "${selectedFlow.name || selectedFlow.id}"\n\nTest Message: ${testMessage}\n\nThis is a test of your webhook flow system. In production, this would trigger the actual flow: ${selectedFlow.name || selectedFlow.id}`
+        // Create a real webhook trigger for the test message
+        const triggerData = {
+          keyword: testMessage.toLowerCase().trim(),
+          flowId: selectedFlow.id,
+          message: `Flow: ${selectedFlow.name || selectedFlow.id}`,
+          isActive: true
+        }
         
-        // Use testTrigger instead of sendFlow to avoid WhatsApp Flow API issues
-        const result = await backendApiService.testTrigger(flowMessage, testPhoneNumber)
+        // Create the trigger in the backend
+        await backendApiService.createTrigger(triggerData)
+        
         setTestResult({
           success: true,
-          message: `Flow test message sent successfully to ${testPhoneNumber}`,
-          flowSent: selectedFlow.name || selectedFlow.id,
-          phoneNumber: testPhoneNumber,
-          testType: 'Flow Information Message',
-          ...result
+          message: `✅ Real Webhook Test Setup Complete!`,
+          flowName: selectedFlow.name || selectedFlow.id,
+          triggerKeyword: testMessage,
+          businessNumber: import.meta.env.VITE_WHATSAPP_BUSINESS_NUMBER,
+          instructions: `📱 Now send "${testMessage}" from your personal WhatsApp to: ${import.meta.env.VITE_WHATSAPP_BUSINESS_NUMBER}\n\n🤖 The webhook will automatically respond with the "${selectedFlow.name || selectedFlow.id}" flow!`,
+          testType: 'Real Webhook Trigger Created'
         })
+        
+        // Refresh the triggers list to show the new one
+        await loadTriggers()
       } else {
-        // Fallback to trigger testing if no flow found
         const result = await backendApiService.testTrigger(testMessage, testPhoneNumber)
         setTestResult({
           success: true,
@@ -174,7 +182,7 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
     } catch (error) {
       setTestResult({
         success: false,
-        error: error instanceof Error ? error.message : 'Test failed'
+        error: error instanceof Error ? error.message : 'Failed to setup webhook test'
       })
     } finally {
       setIsTestingWebhook(false)
@@ -629,7 +637,7 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
           </div>
           <div>
             <h3 className="font-semibold text-lg text-gray-900">Test Webhook</h3>
-            <p className="text-sm text-gray-500">Send test messages to verify your triggers work</p>
+            <p className="text-sm text-gray-500">Create a real webhook trigger and test it from your WhatsApp</p>
           </div>
         </div>
 
@@ -771,7 +779,7 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
               }`}>
                 <TestTube className="h-4 w-4" />
               </div>
-              <span className="text-lg">{isTestingWebhook ? 'Sending Test...' : 'Send Flow Test'}</span>
+              <span className="text-lg">{isTestingWebhook ? 'Setting up Webhook...' : 'Setup Real Webhook Test'}</span>
               {isTestingWebhook && (
                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
               )}
@@ -813,7 +821,20 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
               <div className="text-sm mt-1">
                 {testResult.message || testResult.error}
               </div>
-              {testResult.flowSent && (
+              {testResult.instructions && (
+                <div className="text-sm mt-2 p-3 bg-blue-50 bg-opacity-80 rounded border border-blue-200">
+                  <div className="font-medium text-blue-800">🎯 How to Test Your Webhook:</div>
+                  <div className="mt-2 space-y-1 text-blue-700">
+                    <div>1. Open WhatsApp on your phone</div>
+                    <div>2. Send <strong>"{testResult.triggerKeyword}"</strong> to <strong>{testResult.businessNumber}</strong></div>
+                    <div>3. You should receive the <strong>{testResult.flowName}</strong> flow automatically!</div>
+                  </div>
+                  <div className="mt-2 text-xs text-blue-600 bg-blue-100 p-2 rounded">
+                    💡 A webhook trigger has been created. Check the triggers list above to see it.
+                  </div>
+                </div>
+              )}
+              {testResult.flowSent && !testResult.instructions && (
                 <div className="text-sm mt-2 p-2 bg-white bg-opacity-50 rounded border">
                   <div className="font-medium">📱 Flow Test Details:</div>
                   <div>Flow Tested: {testResult.flowSent}</div>
