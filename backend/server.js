@@ -18,10 +18,21 @@ const corsOptions = {
   origin: [
     process.env.FRONTEND_URL || 'http://localhost:5173',
     'http://localhost:5174',
-    'http://localhost:3000'
-  ],
+    'http://localhost:3000',
+    'http://localhost:5175',
+    // Allow all localhost ports for development
+    /^http:\/\/localhost:\d+$/,
+    // Allow Railway/Vercel/Netlify deployments
+    /^https:\/\/.*\.railway\.app$/,
+    /^https:\/\/.*\.vercel\.app$/,
+    /^https:\/\/.*\.netlify\.app$/,
+    // Allow all origins in development (remove in production)
+    process.env.NODE_ENV === 'development' ? '*' : null
+  ].filter(Boolean),
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 };
 app.use(cors(corsOptions));
 

@@ -22,8 +22,8 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
   const [backendHealth, setBackendHealth] = useState<any>(null)
   const [webhookStatus, setWebhookStatus] = useState({
     isConfigured: false,
-    webhookUrl: `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'}/webhook`,
-    backendUrl: import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001',
+    webhookUrl: `${import.meta.env.VITE_BACKEND_URL}/webhook`,
+    backendUrl: import.meta.env.VITE_BACKEND_URL,
     triggersCount: 0,
     activeTriggersCount: 0,
     isBackendRunning: false
@@ -156,7 +156,7 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
   }
 
   const copyWebhookUrl = () => {
-    const webhookUrl = webhookStatus.webhookUrl || `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'}/webhook`
+    const webhookUrl = webhookStatus.webhookUrl || `${import.meta.env.VITE_BACKEND_URL}/webhook`
     navigator.clipboard.writeText(webhookUrl)
     alert('Webhook URL copied to clipboard')
   }
@@ -182,8 +182,8 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
       // Update webhook status after test
       updateWebhookStatus()
     } catch (error) {
-      console.error('❌ Local test failed:', error)
-      alert(`❌ Backend Test Failed\\n\\nError: ${error instanceof Error ? error.message : 'Unknown error'}\\n🔗 URL: ${webhookStatus.backendUrl}\\n\\n💡 Make sure the backend server is running on port 3001`)
+      console.error('❌ Railway backend test failed:', error)
+      alert(`❌ Railway Backend Test Failed\\n\\nError: ${error instanceof Error ? error.message : 'Unknown error'}\\n🔗 URL: ${webhookStatus.backendUrl}\\n\\n💡 Check Railway deployment status and ensure backend service is running`)
     }
   }
 
@@ -219,7 +219,7 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
             <label className="text-sm font-semibold text-gray-700">Webhook URL:</label>
             <div className="flex items-center space-x-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <code className="flex-1 text-sm font-mono text-blue-800 bg-transparent select-all">
-                {webhookStatus.webhookUrl || `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'}/webhook`}
+                {webhookStatus.webhookUrl || `${import.meta.env.VITE_BACKEND_URL}/webhook`}
               </code>
               <button
                 onClick={copyWebhookUrl}
@@ -236,7 +236,7 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
             <label className="text-sm font-semibold text-gray-700">Backend API URL:</label>
             <div className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg">
               <code className="flex-1 text-sm font-mono text-green-800 bg-transparent select-all">
-                {webhookStatus.backendUrl || import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'}
+                {webhookStatus.backendUrl || import.meta.env.VITE_BACKEND_URL}
               </code>
               <button
                 onClick={copyBackendUrl}
@@ -295,11 +295,11 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h4 className="font-medium text-blue-900 mb-2">Setup Instructions:</h4>
         <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-          <li>Start the backend server (should be running on port 3001)</li>
-          <li>Configure your WhatsApp credentials in backend/.env</li>
-          <li>Deploy backend to production (Heroku, Railway, Vercel, etc.)</li>
-          <li>Update webhook URL in WhatsApp Business API settings</li>
+          <li>Backend is deployed on Railway (✅ Production Ready)</li>
+          <li>WhatsApp credentials are configured in Railway environment</li>
+          <li>Copy webhook URL from above and update in WhatsApp Business API settings</li>
           <li>Subscribe to 'messages' field in webhook configuration</li>
+          <li>Test webhook connection using the test button above</li>
         </ol>
         <div className="mt-3 flex gap-2">
           <button
