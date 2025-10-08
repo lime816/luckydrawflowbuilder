@@ -147,15 +147,20 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
 
     setIsTestingWebhook(true)
     try {
-      // If a specific flow is selected, send that flow directly
+      // If a specific flow is selected, send flow information via text message (safer for testing)
       const selectedFlow = flows.find(flow => flow.id === selectedFlowForTest)
       if (selectedFlow) {
-        const result = await backendApiService.sendFlow(testPhoneNumber, selectedFlow.id, testMessage)
+        // Instead of sending complex flow structure, send a simple message about the flow
+        const flowMessage = `🚀 Flow Test: "${selectedFlow.name || selectedFlow.id}"\n\nTest Message: ${testMessage}\n\nThis is a test of your webhook flow system. In production, this would trigger the actual flow: ${selectedFlow.name || selectedFlow.id}`
+        
+        // Use testTrigger instead of sendFlow to avoid WhatsApp Flow API issues
+        const result = await backendApiService.testTrigger(flowMessage, testPhoneNumber)
         setTestResult({
           success: true,
-          message: `Flow "${selectedFlow.name}" sent successfully to ${testPhoneNumber}`,
-          flowSent: selectedFlow.name,
+          message: `Flow test message sent successfully to ${testPhoneNumber}`,
+          flowSent: selectedFlow.name || selectedFlow.id,
           phoneNumber: testPhoneNumber,
+          testType: 'Flow Information Message',
           ...result
         })
       } else {
@@ -735,7 +740,7 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
             <div className="flex items-start space-x-2 text-xs">
               <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
               <p className="text-gray-600">
-                Select which flow to send when testing. This will send the actual flow to the test number.
+                Select which flow to test. This will send a test message about the selected flow to verify webhook functionality.
                 {flows && flows.length === 0 && (
                   <span className="block text-orange-600 font-medium mt-1">
                     ⚠️ No flows available. Create a flow first using the canvas above.
@@ -743,7 +748,7 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
                 )}
                 {flows && flows.length > 0 && (
                   <span className="block text-green-600 font-medium mt-1">
-                    ✅ {flows.length} flow{flows.length !== 1 ? 's' : ''} available
+                    ✅ {flows.length} flow{flows.length !== 1 ? 's' : ''} available for testing
                   </span>
                 )}
               </p>
@@ -766,7 +771,7 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
               }`}>
                 <TestTube className="h-4 w-4" />
               </div>
-              <span className="text-lg">{isTestingWebhook ? 'Sending Flow...' : 'Send Selected Flow'}</span>
+              <span className="text-lg">{isTestingWebhook ? 'Sending Test...' : 'Send Flow Test'}</span>
               {isTestingWebhook && (
                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
               )}
@@ -810,10 +815,13 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
               </div>
               {testResult.flowSent && (
                 <div className="text-sm mt-2 p-2 bg-white bg-opacity-50 rounded border">
-                  <div className="font-medium">📱 Flow Details:</div>
-                  <div>Flow Name: {testResult.flowSent}</div>
+                  <div className="font-medium">📱 Flow Test Details:</div>
+                  <div>Flow Tested: {testResult.flowSent}</div>
                   <div>Sent to: {testResult.phoneNumber}</div>
-                  <div>Test Message: {testMessage}</div>
+                  <div>Original Message: {testMessage}</div>
+                  {testResult.testType && (
+                    <div>Test Type: {testResult.testType}</div>
+                  )}
                 </div>
               )}
               {testResult.allActiveTriggers && (
