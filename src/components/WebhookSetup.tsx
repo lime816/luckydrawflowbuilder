@@ -16,6 +16,7 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
   const [isAddingTrigger, setIsAddingTrigger] = useState(false)
   const [testMessage, setTestMessage] = useState('hello')
   const [testPhoneNumber, setTestPhoneNumber] = useState('918281348343')
+  const [selectedFlowForTest, setSelectedFlowForTest] = useState('')
   const [isTestingWebhook, setIsTestingWebhook] = useState(false)
   const [testResult, setTestResult] = useState<any>(null)
   const [isLoadingTriggers, setIsLoadingTriggers] = useState(false)
@@ -138,13 +139,32 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
       return
     }
 
+    if (!selectedFlowForTest) {
+      alert('Please select a flow to send for testing')
+      return
+    }
+
     setIsTestingWebhook(true)
     try {
-      const result = await backendApiService.testTrigger(testMessage, testPhoneNumber)
-      setTestResult({
-        success: true,
-        ...result
-      })
+      // If a specific flow is selected, send that flow directly
+      const selectedFlow = flows.find(flow => flow.id === selectedFlowForTest)
+      if (selectedFlow) {
+        const result = await backendApiService.sendFlow(testPhoneNumber, selectedFlow.id, testMessage)
+        setTestResult({
+          success: true,
+          message: `Flow "${selectedFlow.name}" sent successfully to ${testPhoneNumber}`,
+          flowSent: selectedFlow.name,
+          phoneNumber: testPhoneNumber,
+          ...result
+        })
+      } else {
+        // Fallback to trigger testing if no flow found
+        const result = await backendApiService.testTrigger(testMessage, testPhoneNumber)
+        setTestResult({
+          success: true,
+          ...result
+        })
+      }
     } catch (error) {
       setTestResult({
         success: false,
@@ -676,23 +696,62 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
             </div>
           </div>
 
+          {/* Flow Selection */}
+          <div className="space-y-3">
+            <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
+              <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
+                <Settings className="h-3 w-3 text-purple-600" />
+              </div>
+              <span>Select Flow to Send</span>
+            </label>
+            <div className="relative">
+              <select
+                value={selectedFlowForTest}
+                onChange={(e) => setSelectedFlowForTest(e.target.value)}
+                className={`w-full px-4 py-3 border-2 rounded-xl transition-all duration-200 text-gray-900 ${
+                  selectedFlowForTest 
+                    ? 'border-purple-400 bg-purple-50 focus:border-purple-500 focus:ring-4 focus:ring-purple-100' 
+                    : 'border-gray-300 bg-white focus:border-orange-400 focus:ring-4 focus:ring-orange-100 focus:bg-white'
+                }`}
+              >
+                <option value="">Choose a flow to send...</option>
+                {flows.map((flow) => (
+                  <option key={flow.id} value={flow.id}>
+                    {flow.name || `Flow ${flow.id}`}
+                  </option>
+                ))}
+              </select>
+              {selectedFlowForTest && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                </div>
+              )}
+            </div>
+            <div className="flex items-start space-x-2 text-xs">
+              <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+              <p className="text-gray-600">
+                Select which flow to send when testing. This will send the actual flow to the test number.
+              </p>
+            </div>
+          </div>
+
           <div className="flex flex-wrap gap-4">
             <button
               onClick={testWebhook}
-              disabled={isTestingWebhook || !testMessage || !webhookStatus.isBackendRunning}
+              disabled={isTestingWebhook || !testMessage || !selectedFlowForTest || !webhookStatus.isBackendRunning}
               className={`px-8 py-4 rounded-xl font-medium flex items-center space-x-3 transition-all duration-200 transform hover:scale-105 ${
-                isTestingWebhook || !testMessage || !webhookStatus.isBackendRunning
+                isTestingWebhook || !testMessage || !selectedFlowForTest || !webhookStatus.isBackendRunning
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-sm'
                   : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl'
               }`}
             >
               <div className={`p-1 rounded-full ${
-                isTestingWebhook || !testMessage || !webhookStatus.isBackendRunning
+                isTestingWebhook || !testMessage || !selectedFlowForTest || !webhookStatus.isBackendRunning
                   ? 'bg-gray-300' : 'bg-blue-500'
               }`}>
                 <TestTube className="h-4 w-4" />
               </div>
-              <span className="text-lg">{isTestingWebhook ? 'Testing...' : 'Test Webhook'}</span>
+              <span className="text-lg">{isTestingWebhook ? 'Sending Flow...' : 'Send Selected Flow'}</span>
               {isTestingWebhook && (
                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
               )}
@@ -734,6 +793,14 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
               <div className="text-sm mt-1">
                 {testResult.message || testResult.error}
               </div>
+              {testResult.flowSent && (
+                <div className="text-sm mt-2 p-2 bg-white bg-opacity-50 rounded border">
+                  <div className="font-medium">📱 Flow Details:</div>
+                  <div>Flow Name: {testResult.flowSent}</div>
+                  <div>Sent to: {testResult.phoneNumber}</div>
+                  <div>Test Message: {testMessage}</div>
+                </div>
+              )}
               {testResult.allActiveTriggers && (
                 <div className="text-sm mt-1">
                   <div>Matching trigger: {testResult.matchingTrigger ? testResult.matchingTrigger.keyword : 'None'}</div>
