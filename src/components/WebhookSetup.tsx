@@ -22,8 +22,8 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
   const [backendHealth, setBackendHealth] = useState<any>(null)
   const [webhookStatus, setWebhookStatus] = useState({
     isConfigured: false,
-    webhookUrl: 'http://localhost:3001/webhook',
-    backendUrl: 'http://localhost:3001',
+    webhookUrl: `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'}/webhook`,
+    backendUrl: import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001',
     triggersCount: 0,
     activeTriggersCount: 0,
     isBackendRunning: false
@@ -156,7 +156,7 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
   }
 
   const copyWebhookUrl = () => {
-    const webhookUrl = webhookStatus.webhookUrl || 'http://localhost:3001/webhook'
+    const webhookUrl = webhookStatus.webhookUrl || `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'}/webhook`
     navigator.clipboard.writeText(webhookUrl)
     alert('Webhook URL copied to clipboard')
   }
@@ -219,7 +219,7 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
             <label className="text-sm font-semibold text-gray-700">Webhook URL:</label>
             <div className="flex items-center space-x-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <code className="flex-1 text-sm font-mono text-blue-800 bg-transparent select-all">
-                {webhookStatus.webhookUrl || 'http://localhost:3001/webhook'}
+                {webhookStatus.webhookUrl || `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'}/webhook`}
               </code>
               <button
                 onClick={copyWebhookUrl}
@@ -236,7 +236,7 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
             <label className="text-sm font-semibold text-gray-700">Backend API URL:</label>
             <div className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg">
               <code className="flex-1 text-sm font-mono text-green-800 bg-transparent select-all">
-                {webhookStatus.backendUrl || 'http://localhost:3001'}
+                {webhookStatus.backendUrl || import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'}
               </code>
               <button
                 onClick={copyBackendUrl}
