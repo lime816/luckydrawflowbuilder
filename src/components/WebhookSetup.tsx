@@ -149,11 +149,11 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
     try {
       const selectedFlow = flows.find(flow => flow.id === selectedFlowForTest)
       if (selectedFlow) {
-        // Create a real webhook trigger for the test message
+        // Create a real webhook trigger that sends a text message (not a flow) to avoid API errors
         const triggerData = {
           keyword: testMessage.toLowerCase().trim(),
-          flowId: selectedFlow.id,
-          message: `Flow: ${selectedFlow.name || selectedFlow.id}`,
+          flowId: '', // Use empty string to send text message instead of flow
+          message: `🚀 Webhook Test Success!\n\n✅ Flow: "${selectedFlow.name || selectedFlow.id}"\n📝 Trigger: "${testMessage}"\n🤖 Your webhook is working perfectly!\n\nNote: This is a test message. In production, this would trigger your flow "${selectedFlow.name || selectedFlow.id}".`,
           isActive: true
         }
         
