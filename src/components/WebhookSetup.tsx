@@ -333,15 +333,22 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
           </div>
           <button
             onClick={() => setIsAddingTrigger(true)}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`flex items-center space-x-3 px-6 py-3 rounded-xl text-sm font-medium transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl ${
               webhookStatus.isBackendRunning
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-sm'
             }`}
             disabled={!webhookStatus.isBackendRunning}
           >
-            <Plus className="h-4 w-4" />
-            <span>Add Trigger</span>
+            <div className={`p-1 rounded-full ${
+              webhookStatus.isBackendRunning ? 'bg-blue-500' : 'bg-gray-300'
+            }`}>
+              <Plus className="h-4 w-4" />
+            </div>
+            <span className="text-base">Add New Trigger</span>
+            {webhookStatus.isBackendRunning && (
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            )}
           </button>
         </div>
 
@@ -360,31 +367,44 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
           </div>
         )}
 
-        {/* Show example trigger when we have a connection but no triggers */}
+        {/* Enhanced example trigger display */}
         {webhookStatus.isBackendRunning && triggers.length === 0 && !isAddingTrigger && (
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2">
-                <span className="font-medium text-blue-900">→ hello</span>
-                <span className="text-blue-600">triggers</span>
-                <span className="text-sm text-blue-700 bg-blue-100 px-2 py-1 rounded">
-                  your_flow_id_here
-                </span>
+          <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 border-2 border-dashed border-blue-300 rounded-xl p-6 mb-6">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-blue-200 rounded-full -mr-10 -mt-10 opacity-30"></div>
+            <div className="relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-medium">
+                    hello
+                  </div>
+                  <div className="flex items-center space-x-1 text-gray-600">
+                    <span className="text-lg">→</span>
+                    <span className="text-sm">triggers</span>
+                  </div>
+                  <div className="px-3 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-medium border border-purple-200">
+                    📄 Registration Flow
+                  </div>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <Play className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                    <Trash2 className="h-4 w-4 text-red-600" />
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <button className="p-1.5 text-green-600 hover:bg-green-100 rounded" disabled>
-                  <Play className="h-4 w-4" />
-                </button>
-                <button className="p-1.5 text-red-600 hover:bg-red-100 rounded" disabled>
-                  <Trash2 className="h-4 w-4" />
-                </button>
+              <div className="bg-white bg-opacity-60 backdrop-blur-sm rounded-lg p-3 mb-3">
+                <div className="text-sm text-gray-700 mb-1">
+                  💬 <strong>Auto-response message:</strong>
+                </div>
+                <div className="text-sm text-blue-800 font-medium">
+                  "Hello! Please complete this form to continue:"
+                </div>
               </div>
-            </div>
-            <div className="text-sm text-blue-700">
-              "Hello! Please complete this form:"
-            </div>
-            <div className="text-xs text-blue-600 mt-2 opacity-75">
-              This is how your triggers will appear once created
+              <div className="text-xs text-blue-700 bg-blue-100 bg-opacity-50 rounded-lg p-2 text-center">
+                ✨ <strong>Preview:</strong> This is how your triggers will appear once created
+              </div>
             </div>
           </div>
         )}
@@ -446,72 +466,129 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
           </div>
         )}
 
-        {/* Loading State */}
+        {/* Enhanced Loading State */}
         {isLoadingTriggers && (
-          <div className="text-center py-4">
-            <div className="text-sm text-gray-500">Loading triggers...</div>
+          <div className="text-center py-8">
+            <div className="flex items-center justify-center space-x-2 mb-3">
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-600 border-t-transparent"></div>
+              <div className="text-lg font-medium text-gray-700">Loading triggers...</div>
+            </div>
+            <div className="flex justify-center space-x-1">
+              <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+            </div>
           </div>
         )}
 
         {/* Existing Triggers */}
         {!isLoadingTriggers && triggers.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <MessageCircle className="h-8 w-8 text-gray-400" />
+          <div className="text-center py-16">
+            <div className="relative mx-auto mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto shadow-lg">
+                <MessageCircle className="h-10 w-10 text-blue-600" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+                <span className="text-red-600 text-xs font-bold">!</span>
+              </div>
             </div>
-            <h4 className="text-lg font-medium text-gray-900 mb-2">No triggers configured yet</h4>
-            <p className="text-gray-500 mb-6 max-w-md mx-auto">
-              Add triggers to automatically send flows when users send specific keywords like "hello", "register", or "start".
+            <h4 className="text-2xl font-bold text-gray-900 mb-3">No triggers configured yet</h4>
+            <p className="text-gray-600 mb-8 max-w-lg mx-auto text-lg leading-relaxed">
+              Create automated triggers to send flows when users message specific keywords like 
+              <span className="font-semibold text-blue-600">"hello"</span>, 
+              <span className="font-semibold text-green-600">"register"</span>, or 
+              <span className="font-semibold text-purple-600">"start"</span>.
             </p>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto">
-              <div className="text-sm text-blue-800">
-                <strong>Example:</strong> User sends "hello" → System responds with registration flow
+            <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-2 border-dashed border-blue-300 rounded-xl p-6 max-w-lg mx-auto">
+              <div className="text-base text-blue-900 font-medium mb-2">
+                🚀 <strong>How it works:</strong>
+              </div>
+              <div className="text-sm text-blue-800 space-y-1">
+                <div>• User sends: <span className="font-mono bg-blue-100 px-2 py-1 rounded">"hello"</span></div>
+                <div>• System automatically responds with your flow</div>
+                <div>• User receives interactive form instantly</div>
               </div>
             </div>
           </div>
         ) : (
           <div className="space-y-3">
-            {triggers.map((trigger) => (
+            {triggers.map((trigger, index) => (
               <div
                 key={trigger.id}
-                className={`flex items-center justify-between p-3 border rounded ${
-                  trigger.isActive ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
-                }`}
+                className={`group relative overflow-hidden transition-all duration-200 hover:shadow-md ${
+                  trigger.isActive 
+                    ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 shadow-sm' 
+                    : 'bg-gradient-to-r from-gray-50 to-slate-50 border-2 border-gray-200'
+                } rounded-xl p-4 mb-3`}
               >
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3">
-                    <span className="font-medium">{trigger.keyword}</span>
-                    <span className="text-gray-500">→</span>
-                    <span className="text-sm text-gray-600">
-                      {flows.find(f => f.id === trigger.flowId)?.name || trigger.flowId}
-                    </span>
+                {/* Status indicator */}
+                <div className={`absolute top-0 left-0 w-full h-1 ${
+                  trigger.isActive ? 'bg-green-500' : 'bg-gray-300'
+                }`}></div>
+                
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 space-y-2">
+                    {/* Trigger info */}
+                    <div className="flex items-center space-x-3">
+                      <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        trigger.isActive 
+                          ? 'bg-green-600 text-white' 
+                          : 'bg-gray-400 text-white'
+                      }`}>
+                        {trigger.keyword}
+                      </div>
+                      <div className="flex items-center space-x-1 text-gray-500">
+                        <span className="text-lg">→</span>
+                        <span className="text-xs uppercase tracking-wide">triggers</span>
+                      </div>
+                      <div className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-medium border border-blue-200">
+                        📄 {flows.find(f => f.id === trigger.flowId)?.name || 'Unknown Flow'}
+                      </div>
+                      <div className={`px-2 py-1 rounded-md text-xs font-medium ${
+                        trigger.isActive 
+                          ? 'bg-green-100 text-green-700 border border-green-200' 
+                          : 'bg-gray-100 text-gray-600 border border-gray-200'
+                      }`}>
+                        {trigger.isActive ? '✅ Active' : '⏸️ Paused'}
+                      </div>
+                    </div>
+                    
+                    {/* Custom message */}
+                    {trigger.message && (
+                      <div className="bg-white bg-opacity-60 backdrop-blur-sm rounded-lg p-2 ml-2">
+                        <div className="text-xs text-gray-600 mb-1">💬 Auto-response:</div>
+                        <div className="text-sm text-gray-800">"{trigger.message}"</div>
+                      </div>
+                    )}
                   </div>
-                  {trigger.message && (
-                    <p className="text-sm text-gray-500 mt-1">"{trigger.message}"</p>
-                  )}
+                  
+                  {/* Action buttons */}
+                  <div className="flex items-center space-x-2 ml-4">
+                    <button
+                      onClick={() => toggleTrigger(trigger.id, !trigger.isActive)}
+                      className={`p-2 rounded-lg transition-all duration-200 ${
+                        trigger.isActive 
+                          ? 'bg-orange-100 text-orange-600 hover:bg-orange-200 hover:scale-105' 
+                          : 'bg-green-100 text-green-600 hover:bg-green-200 hover:scale-105'
+                      }`}
+                      title={trigger.isActive ? 'Pause Trigger' : 'Activate Trigger'}
+                      disabled={!webhookStatus.isBackendRunning}
+                    >
+                      {trigger.isActive ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                    </button>
+                    <button
+                      onClick={() => removeTrigger(trigger.id)}
+                      className="p-2 bg-red-100 text-red-600 hover:bg-red-200 hover:scale-105 rounded-lg transition-all duration-200"
+                      title="Delete Trigger"
+                      disabled={!webhookStatus.isBackendRunning}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => toggleTrigger(trigger.id, !trigger.isActive)}
-                    className={`p-1.5 rounded ${
-                      trigger.isActive 
-                        ? 'text-green-600 hover:bg-green-100' 
-                        : 'text-gray-400 hover:bg-gray-100'
-                    }`}
-                    title={trigger.isActive ? 'Deactivate' : 'Activate'}
-                    disabled={!webhookStatus.isBackendRunning}
-                  >
-                    {trigger.isActive ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                  </button>
-                  <button
-                    onClick={() => removeTrigger(trigger.id)}
-                    className="p-1.5 text-red-600 hover:bg-red-100 rounded"
-                    title="Delete"
-                    disabled={!webhookStatus.isBackendRunning}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
+                
+                {/* Hover effect overlay */}
+                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-5 transition-opacity duration-200 pointer-events-none"></div>
               </div>
             ))}
           </div>
@@ -530,58 +607,116 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700">Test Message</label>
-              <input
-                type="text"
-                value={testMessage}
-                onChange={(e) => setTestMessage(e.target.value)}
-                placeholder="Enter a keyword to test (e.g., hello, register, start)"
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-              />
-              <p className="text-xs text-gray-500">This should match one of your trigger keywords</p>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
+                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                  <MessageCircle className="h-3 w-3 text-blue-600" />
+                </div>
+                <span>Test Message</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={testMessage}
+                  onChange={(e) => setTestMessage(e.target.value)}
+                  placeholder="Enter a keyword to test (e.g., hello, register, start)"
+                  className={`w-full px-4 py-3 border-2 rounded-xl transition-all duration-200 text-gray-900 placeholder-gray-500 ${
+                    testMessage 
+                      ? 'border-blue-400 bg-blue-50 focus:border-blue-500 focus:ring-4 focus:ring-blue-100' 
+                      : 'border-gray-300 bg-white focus:border-orange-400 focus:ring-4 focus:ring-orange-100 focus:bg-white'
+                  }`}
+                />
+                {testMessage && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                  </div>
+                )}
+              </div>
+              <div className="flex items-start space-x-2 text-xs">
+                <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                <p className="text-gray-600">
+                  This should match one of your trigger keywords for accurate testing
+                </p>
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700">Test Phone Number</label>
-              <input
-                type="text"
-                value={testPhoneNumber}
-                onChange={(e) => setTestPhoneNumber(e.target.value)}
-                placeholder="918281348343"
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-              />
-              <p className="text-xs text-gray-500">WhatsApp number with country code (no +)</p>
+            
+            <div className="space-y-3">
+              <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
+                <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                  <span className="text-green-600 text-xs">📱</span>
+                </div>
+                <span>Test Phone Number</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={testPhoneNumber}
+                  onChange={(e) => setTestPhoneNumber(e.target.value)}
+                  placeholder="918281348343"
+                  className={`w-full px-4 py-3 border-2 rounded-xl transition-all duration-200 text-gray-900 placeholder-gray-500 ${
+                    testPhoneNumber.length >= 10 
+                      ? 'border-green-400 bg-green-50 focus:border-green-500 focus:ring-4 focus:ring-green-100' 
+                      : 'border-gray-300 bg-white focus:border-orange-400 focus:ring-4 focus:ring-orange-100 focus:bg-white'
+                  }`}
+                />
+                {testPhoneNumber.length >= 10 && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                  </div>
+                )}
+              </div>
+              <div className="flex items-start space-x-2 text-xs">
+                <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                <p className="text-gray-600">
+                  WhatsApp number with country code (no + sign required)
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-4">
             <button
               onClick={testWebhook}
               disabled={isTestingWebhook || !testMessage || !webhookStatus.isBackendRunning}
-              className={`px-6 py-3 rounded-lg font-medium flex items-center space-x-2 transition-colors ${
+              className={`px-8 py-4 rounded-xl font-medium flex items-center space-x-3 transition-all duration-200 transform hover:scale-105 ${
                 isTestingWebhook || !testMessage || !webhookStatus.isBackendRunning
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-sm'
+                  : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl'
               }`}
             >
-              <TestTube className="h-4 w-4" />
-              <span>{isTestingWebhook ? 'Testing...' : 'Test Webhook'}</span>
+              <div className={`p-1 rounded-full ${
+                isTestingWebhook || !testMessage || !webhookStatus.isBackendRunning
+                  ? 'bg-gray-300' : 'bg-blue-500'
+              }`}>
+                <TestTube className="h-4 w-4" />
+              </div>
+              <span className="text-lg">{isTestingWebhook ? 'Testing...' : 'Test Webhook'}</span>
+              {isTestingWebhook && (
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+              )}
             </button>
 
             <button
               onClick={runLocalTest}
-              className="px-6 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 flex items-center space-x-2 transition-colors"
+              className="px-8 py-4 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl font-medium hover:from-gray-700 hover:to-gray-800 flex items-center space-x-3 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
             >
-              <Server className="h-4 w-4" />
-              <span>Check Backend</span>
+              <div className="p-1 bg-gray-500 rounded-full">
+                <Server className="h-4 w-4" />
+              </div>
+              <span className="text-lg">Check Backend</span>
             </button>
 
             {!webhookStatus.isBackendRunning && (
-              <div className="flex items-center px-3 py-2 bg-yellow-100 text-yellow-800 rounded-lg text-sm">
-                <AlertCircle className="h-4 w-4 mr-2" />
-                Backend must be running to test
+              <div className="flex items-center px-6 py-4 bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-300 text-yellow-800 rounded-xl text-sm font-medium shadow-sm">
+                <div className="p-1 bg-yellow-200 rounded-full mr-3">
+                  <AlertCircle className="h-4 w-4 text-yellow-600" />
+                </div>
+                <div>
+                  <div className="font-semibold">Backend Required</div>
+                  <div className="text-xs text-yellow-700">Start the backend server to test triggers</div>
+                </div>
               </div>
             )}
           </div>
