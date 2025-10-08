@@ -60,6 +60,18 @@ export default function App() {
     localStorage.setItem('flowActivationMessages', JSON.stringify(flowActivationMessages))
   }, [flowActivationMessages])
 
+  // Auto-load flows when the app starts for WebhookSetup component
+  React.useEffect(() => {
+    const loadInitialFlows = async () => {
+      try {
+        await handleGetAllFlows()
+      } catch (error) {
+        console.log('Failed to auto-load flows on startup:', error)
+      }
+    }
+    loadInitialFlows()
+  }, [])
+
   const showToast = useCallback((type: ToastType, title: string, message: string, duration?: number) => {
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 9)
     const newToast: ToastData = { id, type, title, message, duration }

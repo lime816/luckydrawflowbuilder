@@ -7,6 +7,7 @@ interface WebhookSetupProps {
 }
 
 export default function WebhookSetup({ flows }: WebhookSetupProps) {
+  console.log('🔍 WebhookSetup received flows:', flows)
   const [triggers, setTriggers] = useState<FlowTrigger[]>([])
   const [newTrigger, setNewTrigger] = useState({
     keyword: '',
@@ -715,11 +716,15 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
                 }`}
               >
                 <option value="">Choose a flow to send...</option>
-                {flows.map((flow) => (
-                  <option key={flow.id} value={flow.id}>
-                    {flow.name || `Flow ${flow.id}`}
-                  </option>
-                ))}
+                {flows && flows.length > 0 ? (
+                  flows.map((flow) => (
+                    <option key={flow.id} value={flow.id}>
+                      {flow.name || `Flow ${flow.id}`}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No flows available - Create a flow first</option>
+                )}
               </select>
               {selectedFlowForTest && (
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -731,6 +736,16 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
               <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
               <p className="text-gray-600">
                 Select which flow to send when testing. This will send the actual flow to the test number.
+                {flows && flows.length === 0 && (
+                  <span className="block text-orange-600 font-medium mt-1">
+                    ⚠️ No flows available. Create a flow first using the canvas above.
+                  </span>
+                )}
+                {flows && flows.length > 0 && (
+                  <span className="block text-green-600 font-medium mt-1">
+                    ✅ {flows.length} flow{flows.length !== 1 ? 's' : ''} available
+                  </span>
+                )}
               </p>
             </div>
           </div>
