@@ -15,7 +15,7 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
     message: ''
   })
   const [isAddingTrigger, setIsAddingTrigger] = useState(false)
-  const [testMessage, setTestMessage] = useState('hello')
+  const [testMessage, setTestMessage] = useState('hell')
   const [testPhoneNumber, setTestPhoneNumber] = useState('918281348343')
   const [selectedFlowForTest, setSelectedFlowForTest] = useState('')
   const [isTestingWebhook, setIsTestingWebhook] = useState(false)
