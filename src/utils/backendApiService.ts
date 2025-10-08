@@ -1,8 +1,12 @@
-// API service for communicating with the backend webhook server
+// API service for communicating with the Railway deployed backend webhook server
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-console.log('🔗 Backend URL:', BACKEND_URL);
+if (!BACKEND_URL) {
+  throw new Error('VITE_BACKEND_URL environment variable is required for Railway backend connection');
+}
+
+console.log('🔗 Railway Backend URL:', BACKEND_URL);
 
 export interface FlowTrigger {
   id: string
