@@ -149,29 +149,21 @@ export default function WebhookSetup({ flows }: WebhookSetupProps) {
     try {
       const selectedFlow = flows.find(flow => flow.id === selectedFlowForTest)
       if (selectedFlow) {
-        // Create a real webhook trigger that sends a text message (not a flow) to avoid API errors
-        const triggerData = {
-          keyword: testMessage.toLowerCase().trim(),
-          flowId: '', // Use empty string to send text message instead of flow
-          message: `🚀 Webhook Test Success!\n\n✅ Flow: "${selectedFlow.name || selectedFlow.id}"\n📝 Trigger: "${testMessage}"\n🤖 Your webhook is working perfectly!\n\nNote: This is a test message. In production, this would trigger your flow "${selectedFlow.name || selectedFlow.id}".`,
-          isActive: true
-        }
-        
-        // Create the trigger in the backend
-        await backendApiService.createTrigger(triggerData)
+        // Test the webhook by simulating a trigger without creating a permanent trigger
+        // This avoids the WhatsApp Flow API format issues
+        const result = await backendApiService.testTrigger(testMessage, testPhoneNumber)
         
         setTestResult({
           success: true,
-          message: `✅ Real Webhook Test Setup Complete!`,
+          message: `✅ Webhook Test Simulation Complete!`,
           flowName: selectedFlow.name || selectedFlow.id,
           triggerKeyword: testMessage,
+          phoneNumber: testPhoneNumber,
           businessNumber: import.meta.env.VITE_WHATSAPP_BUSINESS_NUMBER,
-          instructions: `📱 Now send "${testMessage}" from your personal WhatsApp to: ${import.meta.env.VITE_WHATSAPP_BUSINESS_NUMBER}\n\n🤖 The webhook will automatically respond with the "${selectedFlow.name || selectedFlow.id}" flow!`,
-          testType: 'Real Webhook Trigger Created'
+          testType: 'Webhook Simulation Test',
+          simulationNote: 'This tests the webhook functionality without sending actual flows to avoid API format issues.',
+          ...result
         })
-        
-        // Refresh the triggers list to show the new one
-        await loadTriggers()
       } else {
         const result = await backendApiService.testTrigger(testMessage, testPhoneNumber)
         setTestResult({
