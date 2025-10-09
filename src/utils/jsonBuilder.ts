@@ -462,7 +462,7 @@ function isFormElement(element: any): boolean {
   const formElementTypes = [
     'TextInput', 'EmailInput', 'PasswordInput', 'PhoneInput', 'TextArea',
     'CheckboxGroup', 'RadioButtonsGroup', 'ChipsSelector', 'Dropdown', 'OptIn',
-    'DatePicker', 'CalendarPicker', 'NavigationList', 'Footer'
+    'DatePicker', 'CalendarPicker'
   ]
   return formElementTypes.includes(element.type)
 }

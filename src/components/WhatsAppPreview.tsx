@@ -51,6 +51,13 @@ const WhatsAppElement: React.FC<WhatsAppElementProps> = ({ element, onNavigate }
         </div>
       )
 
+    case 'RichText':
+      return (
+        <div className={`${baseClasses} text-sm text-gray-700 leading-relaxed prose prose-sm`}>
+          <div dangerouslySetInnerHTML={{ __html: element.text }} />
+        </div>
+      )
+
     case 'TextInput':
     case 'EmailInput':
     case 'PasswordInput':
@@ -129,6 +136,29 @@ const WhatsAppElement: React.FC<WhatsAppElementProps> = ({ element, onNavigate }
         </div>
       )
 
+    case 'ChipsSelector':
+      return (
+        <div className={baseClasses}>
+          <label className="block text-sm text-gray-600 mb-2">
+            {element.label}
+            {element.required && <span className="text-red-500 ml-1">*</span>}
+          </label>
+          {element.description && (
+            <p className="text-xs text-gray-500 mb-2">{element.description}</p>
+          )}
+          <div className="flex flex-wrap gap-2">
+            {element.dataSource?.map((option: { id: string; title: string }, index: number) => (
+              <button
+                key={option.id || index}
+                className="px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-green-50 hover:border-green-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+              >
+                {option.title}
+              </button>
+            ))}
+          </div>
+        </div>
+      )
+
     case 'Dropdown':
       return (
         <div className={baseClasses}>
@@ -180,6 +210,120 @@ const WhatsAppElement: React.FC<WhatsAppElementProps> = ({ element, onNavigate }
         </div>
       )
 
+    case 'EmbeddedLink':
+      return (
+        <div className={baseClasses}>
+          <a
+            href={element.url || '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline hover:text-blue-800 text-sm"
+          >
+            {element.text}
+          </a>
+        </div>
+      )
+
+    case 'DatePicker':
+      return (
+        <div className={baseClasses}>
+          <label className="block text-sm text-gray-600 mb-1">
+            {element.label}
+            {element.required && <span className="text-red-500 ml-1">*</span>}
+          </label>
+          <input
+            type="date"
+            min={element.minDate}
+            max={element.maxDate}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          />
+          {element.helperText && (
+            <p className="text-xs text-gray-500 mt-1">{element.helperText}</p>
+          )}
+        </div>
+      )
+
+    case 'CalendarPicker':
+      return (
+        <div className={baseClasses}>
+          <label className="block text-sm text-gray-600 mb-1">
+            {element.label}
+            {element.required && <span className="text-red-500 ml-1">*</span>}
+          </label>
+          {element.title && (
+            <div className="text-sm font-medium text-gray-800 mb-1">{element.title}</div>
+          )}
+          {element.description && (
+            <div className="text-xs text-gray-600 mb-2">{element.description}</div>
+          )}
+          <input
+            type={element.mode === 'range' ? 'date' : 'date'}
+            min={element.minDate}
+            max={element.maxDate}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          />
+          {element.helperText && (
+            <p className="text-xs text-gray-500 mt-1">{element.helperText}</p>
+          )}
+        </div>
+      )
+
+    case 'Image':
+      return (
+        <div className={baseClasses}>
+          <div className="relative">
+            <img
+              src={element.src}
+              alt={element.altText || 'Image'}
+              className="w-full rounded-lg object-cover"
+              style={{
+                aspectRatio: element.aspectRatio || 'auto',
+                objectFit: element.scaleType || 'cover',
+                ...(element.width && { maxWidth: `${element.width}px` }),
+                ...(element.height && { height: `${element.height}px` })
+              }}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement
+                target.src = 'https://via.placeholder.com/300x200?text=Image+Not+Found'
+              }}
+            />
+          </div>
+        </div>
+      )
+
+    case 'ImageCarousel':
+      return (
+        <div className={baseClasses}>
+          <div className="relative">
+            {element.images && element.images.length > 0 ? (
+              <div className="flex overflow-x-auto space-x-2 pb-2">
+                {element.images.map((img: { src: string; altText?: string }, index: number) => (
+                  <div key={index} className="flex-shrink-0">
+                    <img
+                      src={img.src}
+                      alt={img.altText || `Image ${index + 1}`}
+                      className="w-48 h-32 rounded-lg object-cover"
+                      style={{
+                        aspectRatio: element.aspectRatio || 'auto',
+                        objectFit: element.scaleType || 'cover'
+                      }}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement
+                        target.src = 'https://via.placeholder.com/300x200?text=Image+Not+Found'
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="w-full h-32 bg-gray-200 rounded-lg flex items-center justify-center">
+                <span className="text-gray-500 text-sm">No images</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )
+
     case 'Footer':
       return (
         <div className="mt-6 pt-4 border-t border-gray-200">
@@ -195,7 +339,7 @@ const WhatsAppElement: React.FC<WhatsAppElementProps> = ({ element, onNavigate }
     default:
       return (
         <div className={`${baseClasses} p-2 bg-gray-100 rounded text-xs text-gray-500`}>
-          Unsupported element: {element.type}
+          Unsupported element: {(element as any).type}
         </div>
       )
   }
