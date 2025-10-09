@@ -247,17 +247,17 @@ function createDefaultElement(type: ElementType): AnyElement {
     case 'OptIn':
       return { id, type, label: 'I agree to the terms', name: 'opt_in', required: true }
     case 'EmbeddedLink':
-      return { id, type, text: 'Click here', url: 'https://example.com' }
+      return { id, type, text: 'Click to verify access', url: 'https://rickrolled.com/?title=test&desc=Verifying+access%E2%80%A6' }
     case 'DatePicker':
       return { id, type, label: 'Select date', name: 'date_picker', required: false }
     case 'CalendarPicker':
       return { id, type, label: 'Select date range', name: 'calendar_picker', required: false, mode: 'single' }
     case 'Image':
-      return { id, type, src: 'https://via.placeholder.com/300x200', altText: 'Placeholder image' }
+      return { id, type, src: './t1.jpg', altText: 'Sample Image' }
     case 'ImageCarousel':
       return { id, type, images: [
-        { src: 'https://via.placeholder.com/300x200', altText: 'Image 1' },
-        { src: 'https://via.placeholder.com/300x200', altText: 'Image 2' }
+        { src: './t1.jpg', altText: 'Sample Image 1' },
+        { src: './t2.jpg', altText: 'Sample Image 2' }
       ] }
     case 'NavigationList':
       return { id, type, name: 'navigation_list', listItems: [

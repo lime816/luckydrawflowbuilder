@@ -295,7 +295,7 @@ function mapElement(el: AnyElement, si: number, ei: number, currentScreen?: Scre
     }
     case 'EmbeddedLink': {
       const result: any = { type: 'EmbeddedLink', text: el.text }
-      if (el.url) result['on-click-action'] = { name: 'open_url', payload: { url: el.url } }
+      if (el.url) result['on-click-action'] = { name: 'open_url', url: el.url }
       if (el.visible !== undefined) result.visible = el.visible
       return result
     }
@@ -334,7 +334,13 @@ function mapElement(el: AnyElement, si: number, ei: number, currentScreen?: Scre
       return result
     }
     case 'ImageCarousel': {
-      const result: any = { type: 'ImageCarousel', images: el.images }
+      const result: any = { 
+        type: 'ImageCarousel', 
+        images: el.images?.map((img: any) => ({
+          src: img.src,
+          ...(img.altText && { 'alt-text': img.altText })
+        })) || []
+      }
       if (el.aspectRatio) result['aspect-ratio'] = el.aspectRatio
       if (el.scaleType) result['scale-type'] = el.scaleType
       return result
