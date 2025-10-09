@@ -35,11 +35,11 @@ const types: { key: ElementType; label: string; icon: React.ReactNode; descripti
   { key: 'CalendarPicker', label: 'Calendar Picker', icon: <CalendarDays className="w-4 h-4" />, description: 'Calendar interface', category: 'Date' },
   
   // Media Components
-  { key: 'Image', label: 'Image', icon: <Image className="w-4 h-4" />, description: 'Display image', category: 'Media' },
-  { key: 'ImageCarousel', label: 'Image Carousel', icon: <Image className="w-4 h-4" />, description: 'Image slideshow', category: 'Media' },
+  // { key: 'Image', label: 'Image', icon: <Image className="w-4 h-4" />, description: 'Display image', category: 'Media' },
+  // { key: 'ImageCarousel', label: 'Image Carousel', icon: <Image className="w-4 h-4" />, description: 'Image slideshow', category: 'Media' },
   
   // Navigation Components
-  { key: 'EmbeddedLink', label: 'Embedded Link', icon: <Link className="w-4 h-4" />, description: 'Clickable link', category: 'Navigation' },
+  // { key: 'EmbeddedLink', label: 'Embedded Link', icon: <Link className="w-4 h-4" />, description: 'Clickable link', category: 'Navigation' },
   { key: 'NavigationList', label: 'Navigation List', icon: <Navigation className="w-4 h-4" />, description: 'List navigation', category: 'Navigation' },
   { key: 'Footer', label: 'Footer Button', icon: <ArrowRight className="w-4 h-4" />, description: 'Action button', category: 'Navigation' },
 ]
