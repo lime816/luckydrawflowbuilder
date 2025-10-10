@@ -253,11 +253,11 @@ function createDefaultElement(type: ElementType): AnyElement {
     case 'CalendarPicker':
       return { id, type, label: 'Select date range', name: 'calendar_picker', required: false, mode: 'single' }
     case 'Image':
-      return { id, type, src: './t1.jpg', altText: 'Sample Image' }
+      return { id, type, src: 'https://www.syfy.com/sites/syfy/files/styles/scale_1280/public/2019/11/courage-the-cowardly-dog.jpg', altText: 'Sample Image' }
     case 'ImageCarousel':
       return { id, type, images: [
-        { src: './t1.jpg', altText: 'Sample Image 1' },
-        { src: './t2.jpg', altText: 'Sample Image 2' }
+        { src: 'https://www.syfy.com/sites/syfy/files/styles/scale_1280/public/2019/11/courage-the-cowardly-dog.jpg', altText: 'Sample Image 1' },
+        { src: 'https://yt3.ggpht.com/a-/AN66SAy6MVt0L0Gqv7d2gCPK11I2emobzFuFJ7GxwA=s900-mo-c-c0xffffffff-rj-k-no', altText: 'Sample Image 2' }
       ] }
     case 'NavigationList':
       return { id, type, name: 'navigation_list', listItems: [
