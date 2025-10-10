@@ -36,7 +36,7 @@ const types: { key: ElementType; label: string; icon: React.ReactNode; descripti
   
   // Media Components
   { key: 'Image', label: 'Image', icon: <Image className="w-4 h-4" />, description: 'Display image', category: 'Media' },
-  { key: 'ImageCarousel', label: 'Image Carousel', icon: <Image className="w-4 h-4" />, description: 'Image slideshow', category: 'Media' },
+  // { key: 'ImageCarousel', label: 'Image Carousel', icon: <Image className="w-4 h-4" />, description: 'Image slideshow', category: 'Media' },
   
   // Navigation Components
   { key: 'EmbeddedLink', label: 'Embedded Link', icon: <Link className="w-4 h-4" />, description: 'Clickable link', category: 'Navigation' },
