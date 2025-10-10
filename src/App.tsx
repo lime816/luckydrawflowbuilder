@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { Moon, Sun, Download, Plus, Code2, MessageCircle, Send, QrCode, Globe, Library } from 'lucide-react'
+import { Moon, Sun, Download, Plus, Code2, MessageCircle, Send, QrCode, Globe, Library, FileSpreadsheet } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ScreenDesigner from './screens/ScreenDesigner'
 import JsonPreviewPanel from './components/JsonPreviewPanel'
@@ -8,6 +8,7 @@ import QRCodeGenerator from './components/QRCodeGenerator'
 import QRFlowInitiator from './components/QRFlowInitiator'
 import WebhookSetup from './components/WebhookSetup'
 import MessageLibrary from './components/MessageLibrary'
+import ExcelImporter from './components/ExcelImporter'
 import { useFlowStore } from './state/store'
 import { buildFlowJson } from './utils/jsonBuilder'
 import { downloadText } from './utils/fileWriter'
@@ -39,6 +40,7 @@ export default function App() {
   const [showQRCodePanel, setShowQRCodePanel] = useState(false)
   const [showWebhookSetup, setShowWebhookSetup] = useState(false)
   const [showMessageLibrary, setShowMessageLibrary] = useState(false)
+  const [showExcelImporter, setShowExcelImporter] = useState(false)
   const [activeFlowId, setActiveFlowId] = useState<string>('')
   const [toasts, setToasts] = useState<ToastData[]>([])
   const [flowActivationMessages, setFlowActivationMessages] = useState<Record<string, string>>({})
@@ -854,6 +856,15 @@ Preview URL: ${result.preview_url || 'Not available'}
                 <span className="hidden sm:inline">Message Library</span>
               </button>
 
+              <button
+                onClick={() => setShowExcelImporter(!showExcelImporter)}
+                className={`btn-secondary flex items-center gap-2 ${showExcelImporter ? 'bg-green-500/20' : ''}`}
+                title="Import Excel Data"
+              >
+                <FileSpreadsheet className="w-4 h-4" />
+                <span className="hidden sm:inline">Excel Import</span>
+              </button>
+
               {activeFlowId && (
                 <button
                   onClick={() => {
@@ -1365,6 +1376,36 @@ Preview URL: ${result.preview_url || 'Not available'}
           <MessageLibrary 
             onClose={() => setShowMessageLibrary(false)}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Excel Importer Panel */}
+      <AnimatePresence>
+        {showExcelImporter && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex bg-slate-900/95 backdrop-blur-sm"
+          >
+            <div className="flex-1 flex flex-col h-full overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-slate-700">
+                <h1 className="text-xl font-bold text-white">Excel Data Importer</h1>
+                <button
+                  onClick={() => setShowExcelImporter(false)}
+                  className="btn-secondary p-2"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              {/* Content */}
+              <div className="flex-1 overflow-auto p-6">
+                <ExcelImporter />
+              </div>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 

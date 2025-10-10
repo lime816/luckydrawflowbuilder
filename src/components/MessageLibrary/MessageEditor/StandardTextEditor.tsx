@@ -1,4 +1,4 @@
-import { } from 'react'
+import React from 'react'
 import type { StandardTextContent } from '../../../types'
 
 type StandardTextEditorProps = {

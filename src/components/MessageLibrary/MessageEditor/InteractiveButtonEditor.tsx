@@ -1,4 +1,4 @@
-import { } from 'react'
+import React from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { nanoid } from 'nanoid/non-secure'
 import type { InteractiveButtonContent, InteractiveButton } from '../../../types'
