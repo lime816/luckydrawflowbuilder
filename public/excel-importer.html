@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Data Importer - Daya Hospital</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2563eb;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        .section h2 {
+            color: #374151;
+            margin-top: 0;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        .success {
+            background-color: #d1fae5;
+            color: #065f46;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .preview {
+            background-color: #f9fafb;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .trigger-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: white;
+            border-left: 4px solid #2563eb;
+            border-radius: 3px;
+        }
+        .trigger-text {
+            font-weight: bold;
+            color: #2563eb;
+        }
+        .message-text {
+            color: #374151;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 Daya Hospital - Excel Data Importer</h1>
+        
+        <div class="section">
+            <h2>📋 Step 1: Copy Your Excel Data</h2>
+            <p>Copy the data from your Excel file (Daya_Hospital_Existing_User_Flow.xlsx) and paste it below:</p>
+            <p><strong>Format:</strong> Each line should have: <code>trigger,message</code></p>
+            <textarea id="excelData" placeholder="Example:
+hello,Welcome to Daya Hospital! How can I help you today? 🏥
+appointment,To book an appointment please call us at +91-XXX-XXXX
+emergency,For medical emergencies call our 24/7 helpline: +91-XXX-XXXX"></textarea>
+            <button onclick="parseData()">Parse Data</button>
+            <button onclick="loadSampleData()">Load Sample Data</button>
+        </div>
+
+        <div class="section">
+            <h2>👀 Step 2: Preview Parsed Data</h2>
+            <div id="preview" class="preview">
+                <p>Paste your Excel data above and click "Parse Data" to see the preview.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🚀 Step 3: Import to Backend</h2>
+            <p>Backend URL: <input type="text" id="backendUrl" value="https://whatsappbackend-production-8946.up.railway.app" style="width: 400px; padding: 5px;"></p>
+            <button onclick="importData()">Import to Backend</button>
+            <button onclick="testImport()">Test with Sample Data</button>
+            <div id="result"></div>
+        </div>
+
+        <div class="section">
+            <h2>📖 Instructions</h2>
+            <ol>
+                <li><strong>Open your Excel file</strong> (Daya_Hospital_Existing_User_Flow.xlsx)</li>
+                <li><strong>Select all data</strong> (triggers in column A, messages in column B)</li>
+                <li><strong>Copy the data</strong> (Ctrl+C)</li>
+                <li><strong>Paste here</strong> in the text area above</li>
+                <li><strong>Click "Parse Data"</strong> to preview</li>
+                <li><strong>Click "Import to Backend"</strong> to save</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        let parsedData = [];
+
+        function parseData() {
+            const rawData = document.getElementById('excelData').value.trim();
+            if (!rawData) {
+                showResult('Please paste your Excel data first.', 'error');
+                return;
+            }
+
+            try {
+                const lines = rawData.split('\n');
+                parsedData = [];
+                
+                lines.forEach((line, index) => {
+                    if (line.trim()) {
+                        const parts = line.split(',');
+                        if (parts.length >= 2) {
+                            const trigger = parts[0].trim();
+                            const message = parts.slice(1).join(',').trim();
+                            parsedData.push([trigger, message]);
+                        }
+                    }
+                });
+
+                showPreview();
+                showResult(`Parsed ${parsedData.length} trigger-message pairs successfully!`, 'success');
+            } catch (error) {
+                showResult('Error parsing data: ' + error.message, 'error');
+            }
+        }
+
+        function showPreview() {
+            const preview = document.getElementById('preview');
+            if (parsedData.length === 0) {
+                preview.innerHTML = '<p>No data to preview.</p>';
+                return;
+            }
+
+            let html = `<h3>Found ${parsedData.length} trigger-message pairs:</h3>`;
+            parsedData.forEach(([trigger, message], index) => {
+                html += `
+                    <div class="trigger-item">
+                        <div class="trigger-text">${index + 1}. Trigger: "${trigger}"</div>
+                        <div class="message-text">Message: "${message.substring(0, 100)}${message.length > 100 ? '...' : ''}"</div>
+                    </div>
+                `;
+            });
+            preview.innerHTML = html;
+        }
+
+        async function importData() {
+            if (parsedData.length === 0) {
+                showResult('Please parse your data first.', 'error');
+                return;
+            }
+
+            const backendUrl = document.getElementById('backendUrl').value.trim();
+            if (!backendUrl) {
+                showResult('Please enter the backend URL.', 'error');
+                return;
+            }
+
+            try {
+                showResult('Importing data to backend...', 'success');
+                
+                const response = await fetch(`${backendUrl}/api/message-library/import-excel`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ data: parsedData })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult(`✅ Successfully imported ${result.summary.totalMessages} messages and ${result.summary.totalTriggers} triggers!`, 'success');
+                } else {
+                    showResult('❌ Import failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error importing data: ' + error.message, 'error');
+            }
+        }
+
+        async function testImport() {
+            const backendUrl = document.getElementById('backendUrl').value.trim();
+            if (!backendUrl) {
+                showResult('Please enter the backend URL.', 'error');
+                return;
+            }
+
+            try {
+                showResult('Testing import with sample data...', 'success');
+                
+                const response = await fetch(`${backendUrl}/api/message-library/test-import`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult(`✅ Test successful! Imported ${result.summary.totalMessages} sample messages and ${result.summary.totalTriggers} triggers.`, 'success');
+                } else {
+                    showResult('❌ Test failed: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error testing import: ' + error.message, 'error');
+            }
+        }
+
+        function loadSampleData() {
+            const sampleData = `hello,Welcome to Daya Hospital! How can I help you today? 🏥
+appointment,To book an appointment please call us at +91-XXX-XXXX or visit our website. Our timings are 9 AM to 6 PM.
+emergency,For medical emergencies please call our 24/7 helpline: +91-XXX-XXXX or visit our emergency department immediately.
+services,We offer: General Medicine Cardiology Orthopedics Pediatrics Gynecology and Emergency Care. Which service do you need?
+location,Daya Hospital is located at [Your Address]. We are easily accessible by public transport and have parking facilities.
+hours,Our hospital timings: 🕘 OPD: 9:00 AM - 6:00 PM 🚨 Emergency: 24/7 📞 Phone: 9:00 AM - 8:00 PM
+doctor,Our experienced doctors are available for consultation. Please specify which department you need: Cardiology Orthopedics Pediatrics etc.
+fees,Consultation fees vary by department. Please call +91-XXX-XXXX for current fee structure or visit our reception.
+reports,Lab reports are usually ready within 24-48 hours. You can collect them from the lab or we can email them to you.
+insurance,We accept most major insurance plans. Please bring your insurance card and ID for verification during your visit.`;
+            
+            document.getElementById('excelData').value = sampleData;
+            parseData();
+        }
+
+        function showResult(message, type) {
+            const result = document.getElementById('result');
+            result.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+    </script>
+</body>
+</html>
