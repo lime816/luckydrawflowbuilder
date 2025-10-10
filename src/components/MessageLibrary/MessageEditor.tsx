@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Save, X, MessageSquare, MousePointer, List, Play, Settings } from 'lucide-react'
 import { useMessageLibraryStore, createNewMessage } from '../../state/messageLibraryStore'
@@ -37,9 +37,7 @@ export default function MessageEditor({ messageId, onClose }: MessageEditorProps
     contentPayload: { body: '' }
   })
 
-  const [sendAfterSave, setSendAfterSave] = useState(false)
-  const defaultBusinessNumber = import.meta.env.VITE_WHATSAPP_BUSINESS_NUMBER || ''
-  const [recipientNumber, setRecipientNumber] = useState(defaultBusinessNumber)
+  // Removed send after save feature - messages should be triggered by user interactions
 
   const isEditing = !!messageId
   const existingMessage = messageId ? getMessageById(messageId) : null
@@ -76,19 +74,6 @@ export default function MessageEditor({ messageId, onClose }: MessageEditorProps
       addMessage({
         ...newMessageData,
         ...formData
-      }).then(async () => {
-        if (sendAfterSave) {
-          // find newly created message and send
-          const all = await (await import('../../state/messageLibraryStore')).useMessageLibraryStore.getState()
-          const created = all.messages.find(m => m.name === formData.name)
-          if (created) {
-            const sender = await import('../../utils/messageLibrarySender')
-            const to = (recipientNumber && recipientNumber.trim()) ? recipientNumber.trim() : defaultBusinessNumber
-            const res = await sender.sendLibraryMessage(created, to)
-            if (res.success) alert('Message sent successfully')
-            else alert('Failed to send: ' + res.error)
-          }
-        }
       })
     }
 
@@ -263,25 +248,7 @@ export default function MessageEditor({ messageId, onClose }: MessageEditorProps
               {renderContentEditor()}
             </div>
 
-            <div className="mt-4 border-t border-slate-700 pt-4">
-              <label className="flex items-center gap-3">
-                <input type="checkbox" checked={sendAfterSave} onChange={(e) => setSendAfterSave(e.target.checked)} />
-                <span className="text-sm text-slate-300">Send this message after saving</span>
-              </label>
-
-              {sendAfterSave && (
-                <div className="mt-3">
-                  <label className="block text-sm text-slate-300 mb-2">Recipient Phone Number</label>
-                  <input
-                    type="text"
-                    value={recipientNumber}
-                    onChange={(e) => setRecipientNumber(e.target.value)}
-                    placeholder="e.g. +919876543210"
-                    className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-              )}
-            </div>
+            {/* Messages are sent automatically when triggers match incoming messages */}
           </div>
         ) : (
           <TriggerEditor messageId={messageId} />

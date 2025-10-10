@@ -1,4 +1,4 @@
-import React from 'react'
+import { } from 'react'
 import { ExternalLink } from 'lucide-react'
 import type { FlowStarterContent } from '../../../types'
 

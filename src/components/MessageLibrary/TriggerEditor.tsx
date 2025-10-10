@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Plus, Trash2, Hash, Globe, MessageCircle, Save } from 'lucide-react'
 import { useMessageLibraryStore } from '../../state/messageLibraryStore'

@@ -3,6 +3,7 @@ import type { MessageLibraryEntry } from '../types'
 
 const PHONE_NUMBER_ID = import.meta.env.VITE_WHATSAPP_PHONE_NUMBER_ID || ''
 const ACCESS_TOKEN = import.meta.env.VITE_WHATSAPP_ACCESS_TOKEN || ''
+const API_VERSION = import.meta.env.VITE_WHATSAPP_API_VERSION || 'v22.0'
 
 function authHeaders() {
   return {
@@ -10,6 +11,9 @@ function authHeaders() {
     'Content-Type': 'application/json'
   }
 }
+
+// Official WhatsApp Business API base URL
+const API_BASE_URL = `https://graph.facebook.com/${API_VERSION}/${PHONE_NUMBER_ID}/messages`
 
 export async function sendLibraryMessage(entry: MessageLibraryEntry, to: string): Promise<{ success: boolean; error?: string }> {
   if (!to) return { success: false, error: 'Missing recipient phone number' }
@@ -20,77 +24,183 @@ export async function sendLibraryMessage(entry: MessageLibraryEntry, to: string)
     switch (entry.type) {
       case 'standard_text': {
         const body = (entry.contentPayload as any).body || ''
-        const res = await fetch(`https://graph.facebook.com/${import.meta.env.VITE_WHATSAPP_API_VERSION || 'v22.0'}/${PHONE_NUMBER_ID}/messages`, {
+        const message = {
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual',
+          to: recipient,
+          type: 'text',
+          text: {
+            preview_url: false,
+            body: body
+          }
+        }
+        
+        const res = await fetch(API_BASE_URL, {
           method: 'POST',
           headers: authHeaders(),
-          body: JSON.stringify({
-            messaging_product: 'whatsapp',
-            to: recipient,
-            type: 'text',
-            text: { body }
-          })
+          body: JSON.stringify(message)
         })
+        
         const data = await res.json()
-        if (!res.ok) return { success: false, error: data.error?.message || 'Failed to send text' }
+        if (!res.ok) {
+          console.error('WhatsApp API Error:', data)
+          return { success: false, error: data.error?.message || 'Failed to send text message' }
+        }
+        
+        console.log('Text message sent successfully:', data)
         return { success: true }
       }
 
       case 'interactive_button': {
         const payload = entry.contentPayload as any
-        const buttons = (payload.buttons || []).slice(0, 3).map((b: any) => ({ type: 'reply', reply: { id: b.buttonId || b.id, title: b.title } }))
+        const buttons = (payload.buttons || []).slice(0, 3).map((b: any) => ({
+          type: 'reply',
+          reply: {
+            id: b.buttonId || b.id,
+            title: b.title
+          }
+        }))
+        
+        const interactive: any = {
+          type: 'button',
+          body: { text: payload.body || '' },
+          action: { buttons }
+        }
+        
+        // Add optional header
+        if (payload.header) {
+          interactive.header = { type: 'text', text: payload.header }
+        }
+        
+        // Add optional footer
+        if (payload.footer) {
+          interactive.footer = { text: payload.footer }
+        }
+        
         const message = {
           messaging_product: 'whatsapp',
+          recipient_type: 'individual',
           to: recipient,
           type: 'interactive',
-          interactive: {
-            type: 'button',
-            header: payload.header ? { type: 'text', text: payload.header } : undefined,
-            body: { text: payload.body || '' },
-            footer: payload.footer ? { text: payload.footer } : undefined,
-            action: { buttons }
-          }
+          interactive
         }
-        const res = await fetch(`https://graph.facebook.com/${import.meta.env.VITE_WHATSAPP_API_VERSION || 'v22.0'}/${PHONE_NUMBER_ID}/messages`, {
+        
+        const res = await fetch(API_BASE_URL, {
           method: 'POST',
           headers: authHeaders(),
           body: JSON.stringify(message)
         })
+        
         const data = await res.json()
-        if (!res.ok) return { success: false, error: data.error?.message || 'Failed to send interactive buttons' }
+        if (!res.ok) {
+          console.error('WhatsApp API Error:', data)
+          return { success: false, error: data.error?.message || 'Failed to send interactive button message' }
+        }
+        
+        console.log('Interactive button message sent successfully:', data)
         return { success: true }
       }
 
       case 'interactive_list': {
         const payload = entry.contentPayload as any
-        // Build sections/rows according to payload
+        
         const interactive: any = {
           type: 'list',
-          header: payload.header ? { type: 'text', text: payload.header } : undefined,
           body: { text: payload.body || '' },
-          footer: payload.footer ? { text: payload.footer } : undefined,
           action: {
-            button: payload.buttonText || 'View',
+            button: payload.buttonText || 'View Options',
             sections: (payload.sections || []).map((s: any) => ({
               title: s.title,
-              rows: (s.rows || []).map((r: any) => ({ id: r.rowId || r.id, title: r.title, description: r.description }))
+              rows: (s.rows || []).map((r: any) => ({
+                id: r.rowId || r.id,
+                title: r.title,
+                description: r.description
+              }))
             }))
           }
         }
+        
+        // Add optional header
+        if (payload.header) {
+          interactive.header = { type: 'text', text: payload.header }
+        }
+        
+        // Add optional footer
+        if (payload.footer) {
+          interactive.footer = { text: payload.footer }
+        }
+        
+        const message = {
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual',
+          to: recipient,
+          type: 'interactive',
+          interactive
+        }
 
-        const res = await fetch(`https://graph.facebook.com/${import.meta.env.VITE_WHATSAPP_API_VERSION || 'v22.0'}/${PHONE_NUMBER_ID}/messages`, {
+        const res = await fetch(API_BASE_URL, {
           method: 'POST',
           headers: authHeaders(),
-          body: JSON.stringify({ messaging_product: 'whatsapp', to: recipient, type: 'interactive', interactive })
+          body: JSON.stringify(message)
         })
+        
         const data = await res.json()
-        if (!res.ok) return { success: false, error: data.error?.message || 'Failed to send interactive list' }
+        if (!res.ok) {
+          console.error('WhatsApp API Error:', data)
+          return { success: false, error: data.error?.message || 'Failed to send interactive list message' }
+        }
+        
+        console.log('Interactive list message sent successfully:', data)
         return { success: true }
       }
 
       case 'flow_starter': {
         const payload = entry.contentPayload as any
-        const service = new WhatsAppService()
-        await service.sendFlowMessage(recipient, payload.flowId, undefined, payload.message || 'Start Flow')
+        
+        const interactive = {
+          type: 'flow',
+          header: {
+            type: 'text',
+            text: 'Complete the Form'
+          },
+          body: {
+            text: payload.message || 'Please complete this form to continue.'
+          },
+          footer: {
+            text: 'Powered by WhatsApp Flow'
+          },
+          action: {
+            name: 'flow',
+            parameters: {
+              flow_message_version: '3',
+              flow_id: payload.flowId,
+              flow_cta: 'Start',
+              flow_action: 'navigate'
+            }
+          }
+        }
+        
+        const message = {
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual',
+          to: recipient,
+          type: 'interactive',
+          interactive
+        }
+        
+        const res = await fetch(API_BASE_URL, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify(message)
+        })
+        
+        const data = await res.json()
+        if (!res.ok) {
+          console.error('WhatsApp API Error:', data)
+          return { success: false, error: data.error?.message || 'Failed to send flow message' }
+        }
+        
+        console.log('Flow message sent successfully:', data)
         return { success: true }
       }
 
