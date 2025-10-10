@@ -38,7 +38,8 @@ export default function MessageEditor({ messageId, onClose }: MessageEditorProps
   })
 
   const [sendAfterSave, setSendAfterSave] = useState(false)
-  const [recipientNumber, setRecipientNumber] = useState('')
+  const defaultBusinessNumber = import.meta.env.VITE_WHATSAPP_BUSINESS_NUMBER || ''
+  const [recipientNumber, setRecipientNumber] = useState(defaultBusinessNumber)
 
   const isEditing = !!messageId
   const existingMessage = messageId ? getMessageById(messageId) : null
@@ -82,7 +83,8 @@ export default function MessageEditor({ messageId, onClose }: MessageEditorProps
           const created = all.messages.find(m => m.name === formData.name)
           if (created) {
             const sender = await import('../../utils/messageLibrarySender')
-            const res = await sender.sendLibraryMessage(created, recipientNumber)
+            const to = (recipientNumber && recipientNumber.trim()) ? recipientNumber.trim() : defaultBusinessNumber
+            const res = await sender.sendLibraryMessage(created, to)
             if (res.success) alert('Message sent successfully')
             else alert('Failed to send: ' + res.error)
           }
