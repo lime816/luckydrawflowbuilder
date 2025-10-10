@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react'
-import { Moon, Sun, Download, Plus, Code2, MessageCircle, Send, QrCode, Globe } from 'lucide-react'
+import { useState, useCallback, useEffect } from 'react'
+import { Moon, Sun, Download, Plus, Code2, MessageCircle, Send, QrCode, Globe, Library } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ScreenDesigner from './screens/ScreenDesigner'
 import JsonPreviewPanel from './components/JsonPreviewPanel'
@@ -7,6 +7,7 @@ import WhatsAppPreview from './components/WhatsAppPreview'
 import QRCodeGenerator from './components/QRCodeGenerator'
 import QRFlowInitiator from './components/QRFlowInitiator'
 import WebhookSetup from './components/WebhookSetup'
+import MessageLibrary from './components/MessageLibrary'
 import { useFlowStore } from './state/store'
 import { buildFlowJson } from './utils/jsonBuilder'
 import { downloadText } from './utils/fileWriter'
@@ -37,6 +38,7 @@ export default function App() {
   const [showFlowSelectionDialog, setShowFlowSelectionDialog] = useState(false)
   const [showQRCodePanel, setShowQRCodePanel] = useState(false)
   const [showWebhookSetup, setShowWebhookSetup] = useState(false)
+  const [showMessageLibrary, setShowMessageLibrary] = useState(false)
   const [activeFlowId, setActiveFlowId] = useState<string>('')
   const [toasts, setToasts] = useState<ToastData[]>([])
   const [flowActivationMessages, setFlowActivationMessages] = useState<Record<string, string>>({})
@@ -45,7 +47,7 @@ export default function App() {
   const businessPhoneNumber = import.meta.env.VITE_WHATSAPP_BUSINESS_NUMBER || '15550617327'
 
   // Load stored activation messages from localStorage on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     const stored = localStorage.getItem('flowActivationMessages')
     if (stored) {
       try {
@@ -57,12 +59,12 @@ export default function App() {
   }, [])
 
   // Save activation messages to localStorage whenever they change
-  React.useEffect(() => {
+  useEffect(() => {
     localStorage.setItem('flowActivationMessages', JSON.stringify(flowActivationMessages))
   }, [flowActivationMessages])
 
   // Auto-load flows when the app starts for WebhookSetup component
-  React.useEffect(() => {
+  useEffect(() => {
     const loadInitialFlows = async () => {
       try {
         await handleGetAllFlows()
@@ -731,7 +733,7 @@ Preview URL: ${result.preview_url || 'Not available'}
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Set dark mode by default
     document.documentElement.classList.add('dark')
   }, [])
@@ -841,6 +843,15 @@ Preview URL: ${result.preview_url || 'Not available'}
               >
                 <Globe className="w-4 h-4" />
                 <span className="hidden sm:inline">Webhooks</span>
+              </button>
+
+              <button
+                onClick={() => setShowMessageLibrary(!showMessageLibrary)}
+                className={`btn-secondary flex items-center gap-2 ${showMessageLibrary ? 'bg-purple-500/20' : ''}`}
+                title="Message & Trigger Library"
+              >
+                <Library className="w-4 h-4" />
+                <span className="hidden sm:inline">Message Library</span>
               </button>
 
               {activeFlowId && (
@@ -1345,6 +1356,15 @@ Preview URL: ${result.preview_url || 'Not available'}
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Message Library Panel */}
+      <AnimatePresence>
+        {showMessageLibrary && (
+          <MessageLibrary 
+            onClose={() => setShowMessageLibrary(false)}
+          />
         )}
       </AnimatePresence>
 

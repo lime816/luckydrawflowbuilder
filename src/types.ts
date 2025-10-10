@@ -251,3 +251,78 @@ export type Screen = {
   success?: boolean
   elements: AnyElement[]
 }
+
+// Message & Trigger Library Types
+export type MessageType = 'standard_text' | 'interactive_button' | 'interactive_list' | 'flow_starter'
+export type MessageStatus = 'draft' | 'published'
+export type TriggerType = 'keyword_match' | 'api_call' | 'flow_response'
+export type NextAction = 'send_message' | 'start_flow'
+
+export type InteractiveButton = {
+  id: string
+  title: string
+  buttonId: string
+}
+
+export type ListSection = {
+  title: string
+  rows: ListRow[]
+}
+
+export type ListRow = {
+  id: string
+  title: string
+  rowId: string
+  description?: string
+}
+
+export type StandardTextContent = {
+  body: string
+}
+
+export type InteractiveButtonContent = {
+  header?: string
+  body: string
+  footer?: string
+  buttons: InteractiveButton[]
+}
+
+export type InteractiveListContent = {
+  header?: string
+  body: string
+  footer?: string
+  buttonText: string
+  sections: ListSection[]
+}
+
+export type FlowStarterContent = {
+  flowId: string
+  message: string
+}
+
+export type MessageContentPayload = 
+  | StandardTextContent 
+  | InteractiveButtonContent 
+  | InteractiveListContent 
+  | FlowStarterContent
+
+export type MessageLibraryEntry = {
+  messageId: string
+  name: string
+  type: MessageType
+  contentPayload: MessageContentPayload
+  status: MessageStatus
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type TriggerConfiguration = {
+  triggerId: string
+  triggerType: TriggerType
+  triggerValue: string | string[]
+  nextAction: NextAction
+  targetId: string
+  messageId: string
+  createdAt: Date
+  updatedAt: Date
+}
