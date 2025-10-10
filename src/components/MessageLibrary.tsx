@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, MessageSquare, Settings, X } from 'lucide-react'
+import { Plus, MessageSquare, Settings, X, TestTube } from 'lucide-react'
 import { useMessageLibraryStore } from '../state/messageLibraryStore'
 import MessageList from './MessageLibrary/MessageList'
 import MessageEditor from './MessageLibrary/MessageEditor'
+import { testSendMessage, debugEnvironment, testWhatsAppAPI } from '../utils/testMessageSender'
 
 type MessageLibraryProps = {
   onClose: () => void
@@ -38,6 +39,21 @@ export default function MessageLibrary({ onClose }: MessageLibraryProps) {
     stopEditing()
   }
 
+  const handleTestMessage = async () => {
+    const phone = prompt('Enter phone number to test (e.g., 918281348343):')
+    if (phone) {
+      await testSendMessage(phone)
+    }
+  }
+
+  const handleDebugEnvironment = () => {
+    debugEnvironment()
+  }
+
+  const handleTestAPI = async () => {
+    await testWhatsAppAPI()
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -54,11 +70,28 @@ export default function MessageLibrary({ onClose }: MessageLibraryProps) {
             </div>
             <div>
               <h1 className="text-xl font-bold text-white">Message & Trigger Library</h1>
-              <p className="text-sm text-slate-400">Create and manage reusable WhatsApp messages</p>
             </div>
           </div>
           
           <div className="flex items-center gap-3">
+            <button
+              onClick={handleTestMessage}
+              className="btn-secondary flex items-center gap-2 text-sm"
+              title="Test message sending"
+            >
+              <TestTube className="w-4 h-4" />
+              Test Send
+            </button>
+            
+            <button
+              onClick={handleTestAPI}
+              className="btn-secondary flex items-center gap-2 text-sm"
+              title="Test WhatsApp API connection"
+            >
+              <Settings className="w-4 h-4" />
+              Test API
+            </button>
+            
             <button
               onClick={handleNewMessage}
               className="btn-primary flex items-center gap-2"
@@ -70,13 +103,11 @@ export default function MessageLibrary({ onClose }: MessageLibraryProps) {
             <button
               onClick={onClose}
               className="btn-secondary p-2"
-              title="Close Message Library"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
         </div>
-
         {/* Main Content */}
         <div className="flex-1 flex overflow-hidden">
           {/* Message List Panel */}
