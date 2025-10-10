@@ -37,6 +37,9 @@ export default function MessageEditor({ messageId, onClose }: MessageEditorProps
     contentPayload: { body: '' }
   })
 
+  const [sendAfterSave, setSendAfterSave] = useState(false)
+  const [recipientNumber, setRecipientNumber] = useState('')
+
   const isEditing = !!messageId
   const existingMessage = messageId ? getMessageById(messageId) : null
   const triggers = messageId ? getTriggersByMessageId(messageId) : []
@@ -72,6 +75,18 @@ export default function MessageEditor({ messageId, onClose }: MessageEditorProps
       addMessage({
         ...newMessageData,
         ...formData
+      }).then(async () => {
+        if (sendAfterSave) {
+          // find newly created message and send
+          const all = await (await import('../../state/messageLibraryStore')).useMessageLibraryStore.getState()
+          const created = all.messages.find(m => m.name === formData.name)
+          if (created) {
+            const sender = await import('../../utils/messageLibrarySender')
+            const res = await sender.sendLibraryMessage(created, recipientNumber)
+            if (res.success) alert('Message sent successfully')
+            else alert('Failed to send: ' + res.error)
+          }
+        }
       })
     }
 
@@ -244,6 +259,26 @@ export default function MessageEditor({ messageId, onClose }: MessageEditorProps
             <div>
               <h3 className="text-sm font-medium text-slate-300 mb-4">Message Content</h3>
               {renderContentEditor()}
+            </div>
+
+            <div className="mt-4 border-t border-slate-700 pt-4">
+              <label className="flex items-center gap-3">
+                <input type="checkbox" checked={sendAfterSave} onChange={(e) => setSendAfterSave(e.target.checked)} />
+                <span className="text-sm text-slate-300">Send this message after saving</span>
+              </label>
+
+              {sendAfterSave && (
+                <div className="mt-3">
+                  <label className="block text-sm text-slate-300 mb-2">Recipient Phone Number</label>
+                  <input
+                    type="text"
+                    value={recipientNumber}
+                    onChange={(e) => setRecipientNumber(e.target.value)}
+                    placeholder="e.g. +919876543210"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+              )}
             </div>
           </div>
         ) : (
