@@ -253,11 +253,11 @@ function createDefaultElement(type: ElementType): AnyElement {
     case 'CalendarPicker':
       return { id, type, label: 'Select date range', name: 'calendar_picker', required: false, mode: 'single' }
     case 'Image':
-      return { id, type, src: '/t1.jpg', altText: 'Local sample image' }
+      return { id, type, src: '/t1.png', altText: 'Local sample image' }
     case 'ImageCarousel':
       return { id, type, images: [
-        { src: '/t1.jpg', altText: 'Local sample 1' },
-        { src: '/t2.jpg', altText: 'Local sample 2' }
+        { src: '/t1.png', altText: 'Local sample 1' },
+        { src: '/t2.png', altText: 'Local sample 2' }
       ] }
     case 'NavigationList':
       return { id, type, name: 'navigation_list', listItems: [
