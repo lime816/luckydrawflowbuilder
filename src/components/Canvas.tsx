@@ -381,24 +381,41 @@ function Preview({ el, onClick, isSelected }: { el: any; onClick: () => void; is
     case 'Image':
       return (
         <div onClick={onClick} className={baseClass}>
-          <div className="bg-slate-950/50 border border-slate-600 rounded-lg p-4 text-center">
-            <svg className="w-12 h-12 mx-auto text-slate-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <p className="text-xs text-slate-500">{el.altText || 'Image'}</p>
+          <div className="bg-slate-950/50 border border-slate-600 rounded-lg p-2 text-center">
+            {el.src ? (
+              <img
+                src={el.src}
+                alt={el.altText || 'Image'}
+                className="mx-auto rounded max-w-full h-32 object-cover"
+                onError={(e) => {
+                  const t = e.target as HTMLImageElement
+                  t.src = '/t1.png'
+                }}
+              />
+            ) : (
+              <div className="w-full h-32 flex items-center justify-center text-slate-500">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+            )}
+            <p className="text-xs text-slate-500 mt-2">{el.altText || 'Image'}</p>
           </div>
         </div>
       )
     case 'ImageCarousel':
       return (
         <div onClick={onClick} className={baseClass}>
-          <div className="bg-slate-950/50 border border-slate-600 rounded-lg p-4">
-            <div className="flex gap-2 mb-2">
-              {el.images?.slice(0, 3).map((_: any, i: number) => (
-                <div key={i} className="w-16 h-12 bg-slate-800 rounded border border-slate-600 flex items-center justify-center">
-                  <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
+          <div className="bg-slate-950/50 border border-slate-600 rounded-lg p-2">
+            <div className="flex gap-2 mb-2 overflow-x-auto pb-2">
+              {el.images?.slice(0, 5).map((img: any, i: number) => (
+                <div key={i} className="flex-shrink-0 w-20 h-14 rounded overflow-hidden border border-slate-700">
+                  <img
+                    src={img.src}
+                    alt={img.altText || `img-${i}`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).src = '/t1.png' }}
+                  />
                 </div>
               ))}
             </div>
