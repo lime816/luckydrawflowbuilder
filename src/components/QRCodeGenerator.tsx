@@ -114,14 +114,14 @@ const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
   return (
     <div className="space-y-6">
       {/* QR Code Display */}
-      <div className="bg-white dark:bg-slate-800 p-6 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-gradient-to-br from-whatsapp-500 to-whatsapp-600 rounded-lg flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
             <QrCode className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">WhatsApp Business QR Code</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Scan to chat with prefilled message</p>
+            <h3 className="text-lg font-semibold text-gray-800">WhatsApp Business QR Code</h3>
+            <p className="text-sm text-gray-600">Scan to chat with prefilled message</p>
           </div>
         </div>
 
@@ -142,11 +142,11 @@ const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
               />
             </div>
             
-            <div className="bg-whatsapp-50 dark:bg-whatsapp-900/20 p-4 rounded-lg mb-6">
-              <p className="text-sm text-whatsapp-800 dark:text-whatsapp-200 font-medium mb-2">
+            <div className="bg-primary-50 p-4 rounded-lg mb-6">
+              <p className="text-sm text-primary-800 font-medium mb-2">
                 📱 How it works:
               </p>
-              <ul className="text-xs text-whatsapp-700 dark:text-whatsapp-300 space-y-1 text-left max-w-md mx-auto">
+              <ul className="text-xs text-primary-700 space-y-1 text-left max-w-md mx-auto">
                 <li>1. User scans QR code with phone camera</li>
                 <li>2. WhatsApp opens with your business chat</li>
                 <li>3. Message is prefilled, user can edit if needed</li>
@@ -174,7 +174,7 @@ const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
               
               <button
                 onClick={openWhatsApp}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors shadow-sm"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
               >
                 <ExternalLink className="w-4 h-4" />
                 Test Link
@@ -190,7 +190,7 @@ const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
             </div>
           </div>
         ) : (
-          <div className="text-center text-slate-500 dark:text-slate-400 py-12">
+          <div className="text-center text-gray-500 py-12">
             <QrCode className="w-12 h-12 mx-auto mb-3 opacity-50" />
             <p>Failed to generate QR code</p>
           </div>
@@ -198,28 +198,28 @@ const QRCodeGenerator: React.FC<QRCodeGeneratorProps> = ({
       </div>
 
       {/* Configuration Preview */}
-      <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
-        <h4 className="font-medium text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-          <div className="w-2 h-2 bg-whatsapp-500 rounded-full"></div>
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <h4 className="font-medium text-gray-800 mb-3 flex items-center gap-2">
+          <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
           Configuration Preview
         </h4>
         
         <div className="space-y-3 text-sm">
           <div className="flex justify-between">
-            <span className="text-slate-600 dark:text-slate-400">Business Number:</span>
-            <code className="text-whatsapp-600 dark:text-whatsapp-400 font-mono">+{businessPhoneNumber}</code>
+            <span className="text-gray-600">Business Number:</span>
+            <code className="text-primary-600 font-mono">+{businessPhoneNumber}</code>
           </div>
           
           <div>
-            <span className="text-slate-600 dark:text-slate-400 block mb-1">Prefilled Message:</span>
-            <div className="bg-white dark:bg-slate-700 p-3 rounded border text-slate-800 dark:text-slate-200">
+            <span className="text-gray-600 block mb-1">Prefilled Message:</span>
+            <div className="bg-white p-3 rounded border text-gray-800">
               "{prefillMessage}"
             </div>
           </div>
           
           <div>
-            <span className="text-slate-600 dark:text-slate-400 block mb-1">Generated URL:</span>
-            <code className="text-xs bg-white dark:bg-slate-700 p-2 rounded border block break-all text-blue-600 dark:text-blue-400">
+            <span className="text-gray-600 block mb-1">Generated URL:</span>
+            <code className="text-xs bg-white p-2 rounded border block break-all text-primary-600">
               {whatsappUrl}
             </code>
           </div>

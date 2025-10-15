@@ -36,7 +36,7 @@ export default function Canvas() {
   if (!screen) {
     return (
       <div className="glass-panel p-8 text-center">
-        <p className="text-slate-400">No screen selected</p>
+        <p className="text-gray-500">No screen selected</p>
       </div>
     )
   }
@@ -49,12 +49,12 @@ export default function Canvas() {
       className="glass-panel overflow-hidden"
     >
       {/* Screen Header */}
-      <div className="bg-gradient-to-r from-slate-800/50 to-slate-900/50 p-4 border-b border-slate-700/50">
+      <div className="bg-gray-50 p-4 border-b border-gray-200">
         <div className="flex items-center gap-3">
-          <Smartphone className="w-5 h-5 text-whatsapp-500" />
+          <Smartphone className="w-5 h-5 text-primary-600" />
           <div>
-            <h3 className="text-lg font-semibold text-white">{screen.title}</h3>
-            <p className="text-xs text-slate-400">{screen.elements.length} components</p>
+            <h3 className="text-lg font-semibold text-gray-800">{screen.title}</h3>
+            <p className="text-xs text-gray-500">{screen.elements.length} components</p>
           </div>
         </div>
       </div>
@@ -67,11 +67,11 @@ export default function Canvas() {
             animate={{ opacity: 1 }}
             className="flex flex-col items-center justify-center py-16 text-center"
           >
-            <div className="w-16 h-16 bg-slate-800/50 rounded-full flex items-center justify-center mb-4">
-              <Smartphone className="w-8 h-8 text-slate-600" />
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <Smartphone className="w-8 h-8 text-gray-400" />
             </div>
-            <p className="text-slate-400 mb-2">No components yet</p>
-            <p className="text-sm text-slate-500">Add components from the palette on the left</p>
+            <p className="text-gray-600 mb-2">No components yet</p>
+            <p className="text-sm text-gray-500">Add components from the palette on the left</p>
           </motion.div>
         ) : (
           <DndContext collisionDetection={closestCenter} onDragEnd={onDragEnd}>
@@ -180,27 +180,27 @@ export default function Canvas() {
 }
 
 function Preview({ el, onClick, isSelected }: { el: any; onClick: () => void; isSelected?: boolean }) {
-  const baseClass = `bg-slate-800/30 border rounded-lg p-4 hover:border-whatsapp-500/50 hover:bg-slate-800/50 transition-all cursor-pointer ${
-    isSelected ? 'border-whatsapp-500 ring-2 ring-whatsapp-500/30' : 'border-slate-700/50'
+  const baseClass = `bg-white border rounded-lg p-4 hover:border-primary-400 hover:shadow-sm transition-all cursor-pointer ${
+    isSelected ? 'border-primary-500 ring-2 ring-primary-500/20' : 'border-gray-200'
   }`
   
   switch (el.type) {
     case 'TextHeading':
       return (
         <div onClick={onClick} className={baseClass}>
-          <h1 className="text-xl font-bold text-white">{el.text}</h1>
+          <h1 className="text-xl font-bold text-gray-800">{el.text}</h1>
         </div>
       )
     case 'TextSubheading':
       return (
         <div onClick={onClick} className={baseClass}>
-          <h2 className="text-lg font-semibold text-white">{el.text}</h2>
+          <h2 className="text-lg font-semibold text-gray-800">{el.text}</h2>
         </div>
       )
     case 'TextBody':
       return (
         <div onClick={onClick} className={baseClass}>
-          <p className={`text-white ${el.fontWeight === 'bold' ? 'font-bold' : ''} ${el.strikethrough ? 'line-through' : ''}`}>
+          <p className={`text-gray-700 ${el.fontWeight === 'bold' ? 'font-bold' : ''} ${el.strikethrough ? 'line-through' : ''}`}>
             {el.text}
           </p>
         </div>
@@ -208,7 +208,7 @@ function Preview({ el, onClick, isSelected }: { el: any; onClick: () => void; is
     case 'TextCaption':
       return (
         <div onClick={onClick} className={baseClass}>
-          <p className={`text-sm text-slate-300 ${el.fontWeight === 'bold' ? 'font-bold' : ''} ${el.strikethrough ? 'line-through' : ''}`}>
+          <p className={`text-sm text-gray-600 ${el.fontWeight === 'bold' ? 'font-bold' : ''} ${el.strikethrough ? 'line-through' : ''}`}>
             {el.text}
           </p>
         </div>
@@ -216,7 +216,7 @@ function Preview({ el, onClick, isSelected }: { el: any; onClick: () => void; is
     case 'RichText':
       return (
         <div onClick={onClick} className={baseClass}>
-          <div className="text-white prose prose-invert prose-sm max-w-none">
+          <div className="text-gray-700 prose prose-sm max-w-none">
             <pre className="whitespace-pre-wrap text-sm">{el.text}</pre>
           </div>
         </div>
@@ -224,9 +224,9 @@ function Preview({ el, onClick, isSelected }: { el: any; onClick: () => void; is
     case 'TextInput':
       return (
         <div onClick={onClick} className={baseClass}>
-          <label className="text-sm text-slate-400 block mb-2">{el.label}</label>
-          <div className="bg-slate-950/50 border border-slate-600 rounded-lg p-3 text-slate-300 text-sm">
-            <span className="text-slate-500">
+          <label className="text-sm text-gray-700 block mb-2">{el.label}</label>
+          <div className="bg-gray-50 border border-gray-300 rounded-lg p-3 text-gray-700 text-sm">
+            <span className="text-gray-400">
               {el.inputType === 'password' || el.inputType === 'passcode' ? '••••••••' : 
                el.inputType === 'email' ? 'user@example.com' :
                el.inputType === 'phone' ? '+1 (555) 123-4567' :
@@ -234,53 +234,53 @@ function Preview({ el, onClick, isSelected }: { el: any; onClick: () => void; is
             </span>
           </div>
           {el.helperText && (
-            <p className="text-xs text-slate-500 mt-1">{el.helperText}</p>
+            <p className="text-xs text-gray-500 mt-1">{el.helperText}</p>
           )}
         </div>
       )
     case 'EmailInput':
       return (
         <div onClick={onClick} className={baseClass}>
-          <label className="text-sm text-slate-400 block mb-2">{el.label}</label>
-          <div className="bg-slate-950/50 border border-slate-600 rounded-lg p-3 text-slate-300 text-sm">
-            <span className="text-slate-500">user@example.com</span>
+          <label className="text-sm text-gray-700 block mb-2">{el.label}</label>
+          <div className="bg-gray-50 border border-gray-300 rounded-lg p-3 text-gray-700 text-sm">
+            <span className="text-gray-400">user@example.com</span>
           </div>
           {el.helperText && (
-            <p className="text-xs text-slate-500 mt-1">{el.helperText}</p>
+            <p className="text-xs text-gray-500 mt-1">{el.helperText}</p>
           )}
         </div>
       )
     case 'PasswordInput':
       return (
         <div onClick={onClick} className={baseClass}>
-          <label className="text-sm text-slate-400 block mb-2">{el.label}</label>
-          <div className="bg-slate-950/50 border border-slate-600 rounded-lg p-3 text-slate-300 text-sm">
-            <span className="text-slate-500">••••••••</span>
+          <label className="text-sm text-gray-700 block mb-2">{el.label}</label>
+          <div className="bg-gray-50 border border-gray-300 rounded-lg p-3 text-gray-700 text-sm">
+            <span className="text-gray-400">••••••••</span>
           </div>
           {el.helperText && (
-            <p className="text-xs text-slate-500 mt-1">{el.helperText}</p>
+            <p className="text-xs text-gray-500 mt-1">{el.helperText}</p>
           )}
         </div>
       )
     case 'PhoneInput':
       return (
         <div onClick={onClick} className={baseClass}>
-          <label className="text-sm text-slate-400 block mb-2">{el.label}</label>
-          <div className="bg-slate-950/50 border border-slate-600 rounded-lg p-3 text-slate-300 text-sm">
-            <span className="text-slate-500">+1 (555) 123-4567</span>
+          <label className="text-sm text-gray-700 block mb-2">{el.label}</label>
+          <div className="bg-gray-50 border border-gray-300 rounded-lg p-3 text-gray-700 text-sm">
+            <span className="text-gray-400">+1 (555) 123-4567</span>
           </div>
           {el.helperText && (
-            <p className="text-xs text-slate-500 mt-1">{el.helperText}</p>
+            <p className="text-xs text-gray-500 mt-1">{el.helperText}</p>
           )}
         </div>
       )
     case 'RadioButtonsGroup':
       return (
         <div onClick={onClick} className={baseClass}>
-          <label className="text-sm text-slate-400 block mb-2">{el.label}</label>
+          <label className="text-sm text-gray-700 block mb-2">{el.label}</label>
           <div className="flex flex-wrap gap-2">
             {el.options.map((o: any) => (
-              <span key={o.id} className="px-3 py-1.5 bg-slate-900/50 border border-slate-600 rounded-full text-sm text-slate-300">
+              <span key={o.id} className="px-3 py-1.5 bg-gray-100 border border-gray-300 rounded-full text-sm text-gray-700">
                 {o.title}
               </span>
             ))}
@@ -290,8 +290,8 @@ function Preview({ el, onClick, isSelected }: { el: any; onClick: () => void; is
     case 'TextArea':
       return (
         <div onClick={onClick} className={baseClass}>
-          <label className="text-sm text-slate-400 block mb-2">{el.label}</label>
-          <div className="bg-slate-950/50 border border-slate-600 rounded-lg p-3 h-20 text-slate-500 text-sm">
+          <label className="text-sm text-gray-700 block mb-2">{el.label}</label>
+          <div className="bg-gray-50 border border-gray-300 rounded-lg p-3 h-20 text-gray-500 text-sm">
             Multiline text input...
           </div>
         </div>
@@ -299,10 +299,10 @@ function Preview({ el, onClick, isSelected }: { el: any; onClick: () => void; is
     case 'Dropdown':
       return (
         <div onClick={onClick} className={baseClass}>
-          <label className="text-sm text-slate-400 block mb-2">{el.label}</label>
-          <div className="bg-slate-950/50 border border-slate-600 rounded-lg p-3 text-slate-300 text-sm flex items-center justify-between">
+          <label className="text-sm text-gray-700 block mb-2">{el.label}</label>
+          <div className="bg-gray-50 border border-gray-300 rounded-lg p-3 text-gray-700 text-sm flex items-center justify-between">
             <span>{el.options[0]?.title ?? 'Select...'}</span>
-            <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </div>
@@ -311,12 +311,12 @@ function Preview({ el, onClick, isSelected }: { el: any; onClick: () => void; is
     case 'CheckboxGroup':
       return (
         <div onClick={onClick} className={baseClass}>
-          <label className="text-sm text-slate-400 block mb-2">{el.label}</label>
+          <label className="text-sm text-gray-700 block mb-2">{el.label}</label>
           <div className="space-y-2">
             {el.dataSource?.slice(0, 3).map((option: any) => (
               <div key={option.id} className="flex items-center gap-2">
-                <div className="w-4 h-4 border border-slate-600 rounded bg-slate-900/50"></div>
-                <span className="text-sm text-slate-300">{option.title}</span>
+                <div className="w-4 h-4 border border-gray-300 rounded bg-white"></div>
+                <span className="text-sm text-gray-700">{option.title}</span>
               </div>
             ))}
           </div>
@@ -325,10 +325,10 @@ function Preview({ el, onClick, isSelected }: { el: any; onClick: () => void; is
     case 'ChipsSelector':
       return (
         <div onClick={onClick} className={baseClass}>
-          <label className="text-sm text-slate-400 block mb-2">{el.label}</label>
+          <label className="text-sm text-gray-700 block mb-2">{el.label}</label>
           <div className="flex flex-wrap gap-2">
             {el.dataSource?.slice(0, 3).map((chip: any) => (
-              <span key={chip.id} className="px-3 py-1 bg-slate-900/50 border border-slate-600 rounded-full text-xs text-slate-300">
+              <span key={chip.id} className="px-3 py-1 bg-gray-100 border border-gray-300 rounded-full text-xs text-gray-700">
                 {chip.title}
               </span>
             ))}
@@ -339,8 +339,8 @@ function Preview({ el, onClick, isSelected }: { el: any; onClick: () => void; is
       return (
         <div onClick={onClick} className={baseClass}>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 border border-slate-600 rounded bg-slate-900/50"></div>
-            <span className="text-sm text-slate-300">{el.label}</span>
+            <div className="w-4 h-4 border border-gray-300 rounded bg-white"></div>
+            <span className="text-sm text-gray-700">{el.label}</span>
           </div>
         </div>
       )
@@ -353,10 +353,10 @@ function Preview({ el, onClick, isSelected }: { el: any; onClick: () => void; is
     case 'DatePicker':
       return (
         <div onClick={onClick} className={baseClass}>
-          <label className="text-sm text-slate-400 block mb-2">{el.label}</label>
-          <div className="bg-slate-950/50 border border-slate-600 rounded-lg p-3 text-slate-300 text-sm flex items-center justify-between">
-            <span className="text-slate-500">Select date...</span>
-            <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <label className="text-sm text-gray-700 block mb-2">{el.label}</label>
+          <div className="bg-gray-50 border border-gray-300 rounded-lg p-3 text-gray-700 text-sm flex items-center justify-between">
+            <span className="text-gray-500">Select date...</span>
+            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
@@ -365,14 +365,14 @@ function Preview({ el, onClick, isSelected }: { el: any; onClick: () => void; is
     case 'CalendarPicker':
       return (
         <div onClick={onClick} className={baseClass}>
-          <label className="text-sm text-slate-400 block mb-2">{el.label}</label>
-          <div className="bg-slate-950/50 border border-slate-600 rounded-lg p-3">
-            <div className="grid grid-cols-7 gap-1 text-xs text-slate-400">
+          <label className="text-sm text-gray-700 block mb-2">{el.label}</label>
+          <div className="bg-gray-50 border border-gray-300 rounded-lg p-3">
+            <div className="grid grid-cols-7 gap-1 text-xs text-gray-600">
               {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
                 <div key={i} className="text-center p-1">{day}</div>
               ))}
               {Array.from({length: 14}, (_, i) => (
-                <div key={i} className="text-center p-1 text-slate-500">{i + 1}</div>
+                <div key={i} className="text-center p-1 text-gray-500">{i + 1}</div>
               ))}
             </div>
           </div>
@@ -381,7 +381,7 @@ function Preview({ el, onClick, isSelected }: { el: any; onClick: () => void; is
     case 'Image':
       return (
         <div onClick={onClick} className={baseClass}>
-          <div className="bg-slate-950/50 border border-slate-600 rounded-lg p-2 text-center">
+          <div className="bg-gray-50 border border-gray-300 rounded-lg p-2 text-center">
             {el.src ? (
               <img
                 src={el.src}
@@ -393,23 +393,23 @@ function Preview({ el, onClick, isSelected }: { el: any; onClick: () => void; is
                 }}
               />
             ) : (
-              <div className="w-full h-32 flex items-center justify-center text-slate-500">
+              <div className="w-full h-32 flex items-center justify-center text-gray-400">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
             )}
-            <p className="text-xs text-slate-500 mt-2">{el.altText || 'Image'}</p>
+            <p className="text-xs text-gray-500 mt-2">{el.altText || 'Image'}</p>
           </div>
         </div>
       )
     case 'ImageCarousel':
       return (
         <div onClick={onClick} className={baseClass}>
-          <div className="bg-slate-950/50 border border-slate-600 rounded-lg p-2">
+          <div className="bg-gray-50 border border-gray-300 rounded-lg p-2">
             <div className="flex gap-2 mb-2 overflow-x-auto pb-2">
               {el.images?.slice(0, 5).map((img: any, i: number) => (
-                <div key={i} className="flex-shrink-0 w-20 h-14 rounded overflow-hidden border border-slate-700">
+                <div key={i} className="flex-shrink-0 w-20 h-14 rounded overflow-hidden border border-gray-300">
                   <img
                     src={img.src}
                     alt={img.altText || `img-${i}`}
@@ -419,25 +419,25 @@ function Preview({ el, onClick, isSelected }: { el: any; onClick: () => void; is
                 </div>
               ))}
             </div>
-            <p className="text-xs text-slate-500 text-center">Image Carousel ({el.images?.length || 0} images)</p>
+            <p className="text-xs text-gray-500 text-center">Image Carousel ({el.images?.length || 0} images)</p>
           </div>
         </div>
       )
     case 'NavigationList':
       return (
         <div onClick={onClick} className={baseClass}>
-          <label className="text-sm text-slate-400 block mb-2">{el.label || 'Navigation List'}</label>
+          <label className="text-sm text-gray-700 block mb-2">{el.label || 'Navigation List'}</label>
           <div className="space-y-2">
             {el.listItems?.slice(0, 2).map((item: any) => (
-              <div key={item.id} className="flex items-center gap-3 p-2 bg-slate-950/50 border border-slate-600 rounded">
-                <div className="w-8 h-8 bg-slate-800 rounded border border-slate-600"></div>
+              <div key={item.id} className="flex items-center gap-3 p-2 bg-white border border-gray-300 rounded">
+                <div className="w-8 h-8 bg-gray-100 rounded border border-gray-300"></div>
                 <div className="flex-1">
-                  <div className="text-sm text-slate-300">{item.mainContent?.title}</div>
+                  <div className="text-sm text-gray-700">{item.mainContent?.title}</div>
                   {item.mainContent?.description && (
-                    <div className="text-xs text-slate-500">{item.mainContent.description}</div>
+                    <div className="text-xs text-gray-500">{item.mainContent.description}</div>
                   )}
                 </div>
-                <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </div>

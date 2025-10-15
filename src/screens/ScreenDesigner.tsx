@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Layers, X } from 'lucide-react'
+import { Layers, X, Menu } from 'lucide-react'
 import Palette from '../components/Palette'
 import Canvas from '../components/Canvas'
 import ScreenSettings from '../components/ScreenSettings'
@@ -15,21 +15,34 @@ interface ScreenDesignerProps {
 
 export default function ScreenDesigner({ flowName, setFlowName, customMessage, setCustomMessage }: ScreenDesignerProps) {
   const { screens, selectedScreenId, selectScreen, removeScreen } = useFlowStore()
+  const [showMobilePalette, setShowMobilePalette] = useState(false)
   
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 h-full p-4 lg:p-0">
+      {/* Mobile Hamburger Menu Button */}
+      <button
+        onClick={() => setShowMobilePalette(!showMobilePalette)}
+        className="lg:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-lg flex items-center justify-center"
+      >
+        {showMobilePalette ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+      </button>
+
       {/* Left Sidebar - Screens & Components */}
       <motion.aside 
         initial={{ x: -50, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ delay: 0.1 }}
-        className="lg:col-span-2 space-y-6"
+        className={`lg:col-span-2 space-y-4 lg:space-y-6 ${
+          showMobilePalette 
+            ? 'fixed inset-0 z-40 bg-gray-50 p-4 overflow-y-auto' 
+            : 'hidden lg:block'
+        }`}
       >
         {/* Screens Section */}
         <div className="glass-panel p-4">
           <div className="flex items-center gap-2 mb-4">
-            <Layers className="w-5 h-5 text-whatsapp-500" />
-            <h3 className="text-lg font-semibold text-white">Screens</h3>
+            <Layers className="w-5 h-5 text-primary-600" />
+            <h3 className="text-lg font-semibold text-gray-800">Screens</h3>
           </div>
           <div className="flex flex-wrap gap-2">
             {screens.map((s, idx) => (
@@ -67,6 +80,16 @@ export default function ScreenDesigner({ flowName, setFlowName, customMessage, s
 
         {/* Palette */}
         <Palette />
+        
+        {/* Close button for mobile */}
+        {showMobilePalette && (
+          <button
+            onClick={() => setShowMobilePalette(false)}
+            className="lg:hidden mt-4 w-full btn-secondary"
+          >
+            Close Menu
+          </button>
+        )}
       </motion.aside>
 
       {/* Main Canvas */}
@@ -74,7 +97,7 @@ export default function ScreenDesigner({ flowName, setFlowName, customMessage, s
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="lg:col-span-7"
+        className="lg:col-span-7 min-h-[400px]"
       >
         <AnimatePresence mode="wait">
           <Canvas key={selectedScreenId} />
@@ -86,9 +109,9 @@ export default function ScreenDesigner({ flowName, setFlowName, customMessage, s
         initial={{ x: 50, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ delay: 0.3 }}
-        className="lg:col-span-3 h-full"
+        className="lg:col-span-3 h-full min-h-[500px]"
       >
-        <div className="glass-panel h-full">
+        <div className="glass-panel h-full overflow-hidden">
           <ScreenSettings 
             flowName={flowName}
             setFlowName={setFlowName}

@@ -46,15 +46,15 @@ export default function ScreenSettings({ flowName, setFlowName, customMessage, s
   if (!screen) return null
 
   return (
-    <div className="h-full flex flex-col bg-slate-950 border-l border-slate-800">
+    <div className="h-full flex flex-col bg-white border-l border-gray-200">
       {/* Header */}
-      <div className="flex items-center gap-2 p-4 border-b border-slate-800">
-        <Settings className="w-5 h-5 text-whatsapp-500" />
-        <h3 className="text-base font-semibold text-white">Screen Settings</h3>
+      <div className="flex items-center gap-2 p-4 border-b border-gray-200">
+        <Settings className="w-5 h-5 text-primary-600" />
+        <h3 className="text-base font-semibold text-gray-800">Screen Settings</h3>
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-slate-800">
+      <div className="border-b border-gray-200">
         <div className="flex overflow-x-auto">
           {screens.map((s) => (
             <button
@@ -65,8 +65,8 @@ export default function ScreenSettings({ flowName, setFlowName, customMessage, s
               }}
               className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                 s.id === selectedScreenId
-                  ? 'border-whatsapp-500 text-whatsapp-500'
-                  : 'border-transparent text-slate-400 hover:text-slate-300'
+                  ? 'border-primary-600 text-primary-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
               {s.id}
@@ -78,7 +78,7 @@ export default function ScreenSettings({ flowName, setFlowName, customMessage, s
       {/* Form */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-2">
+          <label className="block text-xs font-medium text-gray-600 mb-2">
             Screen ID
           </label>
           <input
@@ -91,7 +91,7 @@ export default function ScreenSettings({ flowName, setFlowName, customMessage, s
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-400 mb-2">
+          <label className="block text-xs font-medium text-gray-600 mb-2">
             Title
           </label>
           <input
@@ -104,16 +104,16 @@ export default function ScreenSettings({ flowName, setFlowName, customMessage, s
         </div>
 
         {/* Flow Configuration Section */}
-        <div className="border-t border-slate-700 pt-4 mt-4">
+        <div className="border-t border-gray-200 pt-4 mt-4">
           <div className="flex items-center gap-2 mb-4">
-            <MessageCircle className="w-4 h-4 text-whatsapp-500" />
-            <h4 className="text-sm font-semibold text-white">Flow Configuration</h4>
+            <MessageCircle className="w-4 h-4 text-primary-600" />
+            <h4 className="text-sm font-semibold text-gray-800">Flow Configuration</h4>
           </div>
           
           <div className="space-y-4">
             {/* Flow Name */}
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-2">
+              <label className="block text-xs font-medium text-gray-600 mb-2">
                 Flow Name
               </label>
               <input
@@ -123,12 +123,12 @@ export default function ScreenSettings({ flowName, setFlowName, customMessage, s
                 className="input-field text-sm"
                 placeholder="Enter your flow name..."
               />
-              <p className="text-xs text-slate-500 mt-1">This will be the name of your WhatsApp Flow</p>
+              <p className="text-xs text-gray-500 mt-1">This will be the name of your WhatsApp Flow</p>
             </div>
 
             {/* Activation Message */}
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-2">
+              <label className="block text-xs font-medium text-gray-600 mb-2">
                 Activation Message
               </label>
               <textarea
@@ -138,12 +138,12 @@ export default function ScreenSettings({ flowName, setFlowName, customMessage, s
                 rows={3}
                 placeholder="Enter the message that will activate your flow..."
               />
-              <p className="text-xs text-slate-500 mt-1">This message will be sent to activate your flow</p>
+              <p className="text-xs text-gray-500 mt-1">This message will be sent to activate your flow</p>
             </div>
 
             {/* Quick Presets */}
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-2">Quick Presets</label>
+              <label className="block text-xs font-medium text-gray-600 mb-2">Quick Presets</label>
               <div className="flex flex-wrap gap-1">
                 <button
                   onClick={() => setCustomMessage('Please complete this form to continue with your registration.')}
@@ -167,11 +167,11 @@ export default function ScreenSettings({ flowName, setFlowName, customMessage, s
             </div>
 
             {/* Preview */}
-            <div className="bg-slate-800 p-3 rounded-lg">
-              <h5 className="text-xs font-medium text-slate-300 mb-2">Preview:</h5>
-              <div className="text-xs text-slate-400 space-y-1">
-                <p><span className="text-slate-300">Flow:</span> {flowName || 'Unnamed Flow'}</p>
-                <p><span className="text-slate-300">Message:</span> {customMessage || 'No activation message set'}</p>
+            <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+              <h5 className="text-xs font-medium text-gray-700 mb-2">Preview:</h5>
+              <div className="text-xs text-gray-600 space-y-1">
+                <p><span className="text-gray-800">Flow:</span> {flowName || 'Unnamed Flow'}</p>
+                <p><span className="text-gray-800">Message:</span> {customMessage || 'No activation message set'}</p>
               </div>
             </div>
           </div>

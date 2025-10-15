@@ -15,12 +15,12 @@ export function SortableItem({ id, children }: { id: string; children: React.Rea
     <div 
       ref={setNodeRef} 
       style={style} 
-      className="flex items-stretch gap-2 bg-slate-900/30 border border-slate-700/50 rounded-lg p-3 hover:border-whatsapp-500/30 transition-all"
+      className="flex items-stretch gap-2 bg-white border border-gray-200 rounded-lg p-3 hover:border-primary-400 hover:shadow-sm transition-all"
     >
       <div 
         {...attributes} 
         {...listeners}
-        className="drag-handle flex items-center cursor-grab active:cursor-grabbing text-slate-500 hover:text-whatsapp-500 transition-colors"
+        className="drag-handle flex items-center cursor-grab active:cursor-grabbing text-gray-400 hover:text-primary-600 transition-colors"
       >
         <GripVertical className="w-5 h-5" />
       </div>

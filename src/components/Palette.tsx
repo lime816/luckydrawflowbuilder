@@ -63,13 +63,13 @@ export default function Palette() {
   return (
     <div className="glass-panel p-4">
       <div className="flex items-center gap-2 mb-4">
-        <Plus className="w-5 h-5 text-whatsapp-500" />
-        <h3 className="text-lg font-semibold text-white">Components</h3>
+        <Plus className="w-5 h-5 text-primary-600" />
+        <h3 className="text-lg font-semibold text-gray-800">Components</h3>
       </div>
       <div className="space-y-4 max-h-[600px] overflow-y-auto">
         {Object.entries(categories).map(([category, categoryTypes]) => (
           <div key={category}>
-            <h4 className="text-xs font-medium text-slate-400 mb-2 uppercase tracking-wide">
+            <h4 className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">
               {category}
             </h4>
             <div className="space-y-2">
@@ -84,10 +84,10 @@ export default function Palette() {
                   onClick={() => add(t.key)}
                   className="w-full component-card flex items-start gap-3 text-left"
                 >
-                  <div className="mt-0.5 text-whatsapp-500">{t.icon}</div>
+                  <div className="mt-0.5 text-primary-600">{t.icon}</div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-white text-sm">{t.label}</div>
-                    <div className="text-xs text-slate-400 truncate">{t.description}</div>
+                    <div className="font-medium text-gray-800 text-sm">{t.label}</div>
+                    <div className="text-xs text-gray-500 truncate">{t.description}</div>
                   </div>
                 </motion.button>
               ))}
