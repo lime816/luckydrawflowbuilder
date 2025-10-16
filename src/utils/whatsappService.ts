@@ -958,6 +958,20 @@ export class WhatsAppService {
         const latestAsset = result.data[0];
         console.log('Latest asset:', latestAsset);
         
+        // Check if there's a download_url in the asset
+        if (latestAsset.download_url) {
+          console.log('🔗 Found download URL in asset, fetching JSON...');
+          try {
+            const jsonData = await this.fetchFlowJsonFromDownloadUrl(latestAsset.download_url);
+            if (jsonData && jsonData.screens) {
+              console.log('✅ Successfully fetched flow JSON from asset download URL');
+              return jsonData;
+            }
+          } catch (err) {
+            console.warn('⚠️ Failed to fetch from asset download URL:', err);
+          }
+        }
+        
         if (typeof latestAsset.asset === 'string') {
           try {
             const parsed = JSON.parse(latestAsset.asset);
@@ -1005,6 +1019,23 @@ export class WhatsAppService {
         console.log('⚠️ Format 4: Got flow details but no asset/screen data');
         console.log('Flow status:', result.status);
         
+        // Check if there's a download URL in the preview object
+        if (result.preview?.download_url) {
+          console.log('🔗 Found download URL, attempting to fetch flow JSON...');
+          try {
+            const jsonData = await this.fetchFlowJsonFromDownloadUrl(result.preview.download_url);
+            if (jsonData && jsonData.screens) {
+              console.log('✅ Successfully fetched flow JSON from download URL');
+              return {
+                ...jsonData,
+                _flowInfo: result
+              };
+            }
+          } catch (err) {
+            console.warn('⚠️ Failed to fetch from download URL:', err);
+          }
+        }
+        
         return {
           screens: [],
           version: result.json_version || 'N/A',
@@ -1024,6 +1055,31 @@ export class WhatsAppService {
       }
       
       throw new Error('Failed to load flow preview. Please ensure the flow has been properly configured with screens.');
+    }
+  }
+
+  async fetchFlowJsonFromDownloadUrl(downloadUrl: string) {
+    try {
+      console.log('📥 Fetching flow JSON from download URL:', downloadUrl);
+      
+      const response = await fetch(downloadUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`
+        }
+      });
+
+      if (!response.ok) {
+        console.error('Failed to fetch from download URL:', response.status);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const jsonData = await response.json();
+      console.log('✅ Flow JSON fetched successfully:', jsonData);
+      return jsonData;
+    } catch (error) {
+      console.error('Error fetching flow JSON from download URL:', error);
+      throw error;
     }
   }
 

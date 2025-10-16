@@ -267,76 +267,28 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                   {renderScreenPreview(flowAsset.screens[selectedScreen])}
                 </>
               ) : (
-                <div className="space-y-4">
-                  {/* Show iframe preview if available */}
-                  {previewUrl && showIframePreview ? (
-                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                      <div className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200">
-                        <p className="text-sm font-medium text-gray-700">WhatsApp Flow Preview</p>
-                        <button
-                          onClick={() => setShowIframePreview(false)}
-                          className="text-xs text-gray-600 hover:text-gray-800"
-                        >
-                          Close Preview
-                        </button>
-                      </div>
-                      <div className="relative" style={{ height: '600px' }}>
-                        <iframe
-                          src={previewUrl}
-                          className="w-full h-full"
-                          title="WhatsApp Flow Preview"
-                          sandbox="allow-same-origin allow-scripts allow-forms"
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-12 bg-white rounded-lg border border-gray-200">
-                      <AlertCircle className="w-12 h-12 text-blue-500 mb-4" />
-                      <p className="text-gray-900 font-medium mb-2">Screen Preview Not Available via API</p>
-                      <p className="text-sm text-gray-600 mb-4 text-center max-w-md">
-                        {flowAsset._note || "This flow's screen data is not accessible through the API. This is normal for published flows."}
-                      </p>
+                <div className="flex flex-col items-center justify-center py-12 bg-white rounded-lg border border-gray-200">
+                  <AlertCircle className="w-12 h-12 text-yellow-500 mb-4" />
+                  <p className="text-gray-900 font-medium mb-2">No Screens Available</p>
+                  <p className="text-sm text-gray-600 mb-4 text-center max-w-md">
+                    {flowAsset._note || "Unable to load flow screens. The flow may be empty or the download URL is not accessible."}
+                  </p>
+                  
+                  {previewUrl && (
+                    <div className="space-y-3 w-full max-w-md">
+                      <button
+                        onClick={() => window.open(previewUrl, '_blank', 'width=400,height=700')}
+                        className="w-full px-4 py-3 bg-whatsapp-500 hover:bg-whatsapp-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        Open WhatsApp Preview
+                      </button>
                       
-                      {previewUrl ? (
-                        <div className="space-y-3 w-full max-w-md">
-                          <div className="grid grid-cols-2 gap-3">
-                            <button
-                              onClick={() => setShowIframePreview(true)}
-                              className="px-4 py-3 bg-whatsapp-500 hover:bg-whatsapp-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-                            >
-                              <Eye className="w-4 h-4" />
-                              Load Preview
-                            </button>
-                            
-                            <button
-                              onClick={() => window.open(previewUrl, '_blank', 'width=400,height=700')}
-                              className="px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                              Open in Window
-                            </button>
-                          </div>
-                          
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <p className="text-sm text-blue-800 mb-2">
-                              <strong>Preview Options:</strong>
-                            </p>
-                            <ul className="text-xs text-blue-700 space-y-1 list-disc list-inside">
-                              <li><strong>Load Preview:</strong> Embed preview in this panel (may have CORS restrictions)</li>
-                              <li><strong>Open in Window:</strong> Opens preview in a new popup window</li>
-                            </ul>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md">
-                          <p className="text-sm text-blue-800 mb-2">
-                            <strong>Note:</strong> WhatsApp's API doesn't provide direct access to flow screens for published flows.
-                          </p>
-                          <p className="text-xs text-blue-700">
-                            You can view and edit the flow screens in WhatsApp Business Manager using the link below.
-                          </p>
-                        </div>
-                      )}
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p className="text-xs text-blue-700">
+                          Opens the official WhatsApp flow preview in a new window
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
