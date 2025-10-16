@@ -899,6 +899,47 @@ export class WhatsAppService {
     }
   }
 
+  async getFlowAsset(flowId: string) {
+    try {
+      console.log(`Fetching flow asset (JSON) for ${flowId}...`);
+      
+      const response = await fetch(`https://graph.facebook.com/v22.0/${flowId}/assets`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Failed to fetch flow asset:', errorData);
+        throw new Error(`Failed to fetch flow asset: ${errorData.error?.message || JSON.stringify(errorData)}`);
+      }
+
+      const result = await response.json();
+      console.log('Flow asset retrieved successfully');
+      
+      // The API returns the asset data in the 'data' array
+      if (result.data && result.data.length > 0) {
+        // Get the latest asset
+        const latestAsset = result.data[0];
+        
+        // Parse the asset if it's a string
+        if (typeof latestAsset.asset === 'string') {
+          return JSON.parse(latestAsset.asset);
+        }
+        
+        return latestAsset.asset || latestAsset;
+      }
+      
+      throw new Error('No asset data found for this flow');
+    } catch (error) {
+      console.error('Error fetching flow asset:', error);
+      throw error;
+    }
+  }
+
   async createFlowDirect(flowName: string, flowJson: any) {
     try {
       console.log(`Creating flow directly: ${flowName}`);

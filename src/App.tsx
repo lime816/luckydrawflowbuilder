@@ -5,6 +5,7 @@ import ScreenDesigner from './screens/ScreenDesigner'
 import JsonPreviewPanel from './components/JsonPreviewPanel'
 import WhatsAppPreview from './components/WhatsAppPreview'
 import FlowXPPanel from './components/FlowXPPanel'
+import FlowPreviewPane from './components/FlowPreviewPane'
 import QRCodeGenerator from './components/QRCodeGenerator'
 import QRFlowInitiator from './components/QRFlowInitiator'
 import WebhookSetup from './components/WebhookSetup'
@@ -26,6 +27,9 @@ export default function App() {
   const [showJsonPreview, setShowJsonPreview] = useState(false)
   const [showWhatsAppPreview, setShowWhatsAppPreview] = useState(false)
   const [showFlowXP, setShowFlowXP] = useState(false)
+  const [showFlowPreview, setShowFlowPreview] = useState(false)
+  const [previewFlowId, setPreviewFlowId] = useState<string>('')
+  const [previewFlowName, setPreviewFlowName] = useState<string>('')
   const [showSendDialog, setShowSendDialog] = useState(false)
   const [phoneNumber, setPhoneNumber] = useState('918281348343')
   const [isSending, setIsSending] = useState(false)
@@ -1014,6 +1018,18 @@ Preview URL: ${result.preview_url || 'Not available'}
                             
                             <div className="flex gap-2">
                               <button
+                                onClick={() => {
+                                  setPreviewFlowId(flow.id)
+                                  setPreviewFlowName(flow.name || 'Unnamed Flow')
+                                  setShowFlowPreview(true)
+                                }}
+                                className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded flex items-center gap-1"
+                                title="Preview flow screens"
+                              >
+                                👁️ Preview
+                              </button>
+                              
+                              <button
                                 onClick={() => handleFlowDetails(flow.id)}
                                 className="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white text-sm rounded"
                                 title="View flow details"
@@ -1626,6 +1642,21 @@ Preview URL: ${result.preview_url || 'Not available'}
             onClose={() => setShowFlowXP(false)} 
             availableFlows={allFlows}
             availableMessages={messages}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Flow Preview Pane */}
+      <AnimatePresence>
+        {showFlowPreview && previewFlowId && (
+          <FlowPreviewPane
+            flowId={previewFlowId}
+            flowName={previewFlowName}
+            onClose={() => {
+              setShowFlowPreview(false)
+              setPreviewFlowId('')
+              setPreviewFlowName('')
+            }}
           />
         )}
       </AnimatePresence>
