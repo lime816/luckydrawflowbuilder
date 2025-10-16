@@ -253,11 +253,17 @@ function createDefaultElement(type: ElementType): AnyElement {
     case 'CalendarPicker':
       return { id, type, label: 'Select date range', name: 'calendar_picker', required: false, mode: 'single' }
     case 'Image':
-      return { id, type, src: '/t1.png', altText: 'Local sample image' }
+      return { id, type, src: 'iVBORw0KGgoAAAANSUhEUgAAAB4AAAAKCAIAAAAsFXl4AAAANElEQVR4nGL5ctWagWjwuH0b8YqZiFdKKhg1Gg2wzOawIV61t1AF8YqHZoAMTaMBAQAA//9ljAXx5eZ2mwAAAABJRU5ErkJggg==', altText: 'Sample image' }
     case 'ImageCarousel':
       return { id, type, images: [
-        { src: '/t1.png', altText: 'Local sample 1' },
-        { src: '/t2.png', altText: 'Local sample 2' }
+        { 
+          src: 'iVBORw0KGgoAAAANSUhEUgAAAB4AAAAKCAIAAAAsFXl4AAAANElEQVR4nGL5ctWagWjwuH0b8YqZiFdKKhg1Gg2wzOawIV61t1AF8YqHZoAMTaMBAQAA//9ljAXx5eZ2mwAAAABJRU5ErkJggg==', 
+          altText: 'Landscape image' 
+        },
+        { 
+          src: 'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAIAAAACUFjqAAAALElEQVR4nGIRPRrBgATeWLsjc5kY8AKaSrPIL3FA5i9evZNudhOQBgQAAP//2DAFw06W30wAAAAASUVORK5CYII=', 
+          altText: 'Square image' 
+        }
       ] }
     case 'PhotoPicker':
       return { 
