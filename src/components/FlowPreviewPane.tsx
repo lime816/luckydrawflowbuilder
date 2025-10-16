@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Eye, Loader, AlertCircle, ExternalLink } from 'lucide-react'
+import { X, Eye, Loader, AlertCircle, ExternalLink, Code2 } from 'lucide-react'
 import { WhatsAppService } from '../utils/whatsappService'
 
 interface FlowPreviewPaneProps {
@@ -32,6 +32,8 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
   const [selectedScreen, setSelectedScreen] = useState<number>(0)
   const [showIframePreview, setShowIframePreview] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [showJsonInput, setShowJsonInput] = useState(false)
+  const [jsonInput, setJsonInput] = useState('')
 
   useEffect(() => {
     loadFlowAsset()
@@ -66,6 +68,28 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
       setError(errorMessage)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleLoadFromJson = () => {
+    try {
+      const parsed = JSON.parse(jsonInput)
+      console.log('Parsed JSON:', parsed)
+      
+      if (parsed.screens && Array.isArray(parsed.screens)) {
+        setFlowAsset({
+          ...parsed,
+          _flowInfo: flowAsset?._flowInfo
+        })
+        setSelectedScreen(0)
+        setShowJsonInput(false)
+        setJsonInput('')
+        setError(null)
+      } else {
+        setError('Invalid JSON: No screens array found')
+      }
+    } catch (err) {
+      setError('Invalid JSON format: ' + (err instanceof Error ? err.message : 'Parse error'))
     }
   }
 
@@ -297,6 +321,32 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                         <ExternalLink className="w-4 h-4" />
                         Download Flow JSON
                       </button>
+                    )}
+                    
+                    <button
+                      onClick={() => setShowJsonInput(!showJsonInput)}
+                      className="w-full px-4 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Code2 className="w-4 h-4" />
+                      {showJsonInput ? 'Hide' : 'Paste'} JSON Manually
+                    </button>
+                    
+                    {showJsonInput && (
+                      <div className="space-y-2">
+                        <textarea
+                          value={jsonInput}
+                          onChange={(e) => setJsonInput(e.target.value)}
+                          placeholder="Paste the downloaded JSON here..."
+                          className="w-full h-40 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono resize-y focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        />
+                        <button
+                          onClick={handleLoadFromJson}
+                          disabled={!jsonInput.trim()}
+                          className="w-full px-4 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
+                        >
+                          Load Preview from JSON
+                        </button>
+                      </div>
                     )}
                     
                     <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
