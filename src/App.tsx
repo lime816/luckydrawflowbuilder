@@ -939,7 +939,7 @@ Preview URL: ${result.preview_url || 'Not available'}
               className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex flex-col h-full">
+              <div className="flex flex-col h-full max-h-[80vh]">
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
                   <h3 className="text-xl font-bold text-gray-800">
                     WhatsApp Flows Management
@@ -953,7 +953,7 @@ Preview URL: ${result.preview_url || 'Not available'}
                   </button>
                 </div>
                 
-                <div className="flex-1 overflow-auto p-6">
+                <div className="flex-1 overflow-y-auto p-6" style={{ maxHeight: 'calc(80vh - 80px)' }}>
                   <div className="mb-4 flex gap-2">
                     <button
                       onClick={handleGetAllFlows}

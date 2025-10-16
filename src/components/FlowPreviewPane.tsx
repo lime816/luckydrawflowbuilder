@@ -261,14 +261,19 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                 </>
               ) : (
                 <div className="flex flex-col items-center justify-center py-12 bg-white rounded-lg border border-gray-200">
-                  <AlertCircle className="w-12 h-12 text-yellow-500 mb-4" />
-                  <p className="text-gray-900 font-medium mb-2">No screens configured yet</p>
+                  <AlertCircle className="w-12 h-12 text-blue-500 mb-4" />
+                  <p className="text-gray-900 font-medium mb-2">Screen Preview Not Available</p>
                   <p className="text-sm text-gray-600 mb-4 text-center max-w-md">
-                    This flow doesn't have any screens yet. You can add screens in WhatsApp Business Manager.
+                    {flowAsset._note || "This flow's screen data is not accessible through the API. This is normal for published flows."}
                   </p>
-                  {flowAsset._note && (
-                    <p className="text-xs text-gray-500 mt-2">{flowAsset._note}</p>
-                  )}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md">
+                    <p className="text-sm text-blue-800 mb-2">
+                      <strong>Note:</strong> WhatsApp's API doesn't provide direct access to flow screens for published flows.
+                    </p>
+                    <p className="text-xs text-blue-700">
+                      You can view and edit the flow screens in WhatsApp Business Manager using the link below.
+                    </p>
+                  </div>
                 </div>
               )}
 

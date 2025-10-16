@@ -901,9 +901,10 @@ export class WhatsAppService {
 
   async getFlowAsset(flowId: string) {
     try {
-      console.log(`Fetching flow asset (JSON) for ${flowId}...`);
+      console.log(`🔍 Fetching flow asset (JSON) for ${flowId}...`);
       
       // Method 1: Try to get assets directly
+      console.log('📡 Attempting Method 1: Direct asset fetch...');
       let response = await fetch(`https://graph.facebook.com/v22.0/${flowId}/assets`, {
         method: 'GET',
         headers: {
@@ -912,10 +913,14 @@ export class WhatsAppService {
         }
       });
 
+      let method1Success = response.ok;
+      console.log(`Method 1 result: ${response.ok ? '✅ Success' : '❌ Failed'} (Status: ${response.status})`);
+
       if (!response.ok) {
-        console.warn('Direct asset fetch failed, trying alternative method...');
+        console.warn('⚠️ Direct asset fetch failed, trying alternative method...');
         
         // Method 2: Try getting flow details with fields parameter
+        console.log('📡 Attempting Method 2: Flow details with fields...');
         response = await fetch(`https://graph.facebook.com/v22.0/${flowId}?fields=id,name,status,categories,validation_errors,json_version,data_api_version,endpoint_uri,preview`, {
           method: 'GET',
           headers: {
@@ -923,65 +928,96 @@ export class WhatsAppService {
             'Content-Type': 'application/json'
           }
         });
+        console.log(`Method 2 result: ${response.ok ? '✅ Success' : '❌ Failed'} (Status: ${response.status})`);
       }
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Failed to fetch flow asset:', errorData);
+        console.error('❌ Failed to fetch flow asset:', errorData);
         
         // Provide more helpful error message
         if (errorData.error?.code === 100) {
-          throw new Error('Invalid flow ID or insufficient permissions to access flow assets');
+          throw new Error('Invalid flow ID or insufficient permissions to access flow assets. Make sure your access token has the required permissions.');
         } else if (errorData.error?.code === 190) {
-          throw new Error('Access token expired or invalid. Please check your WhatsApp API credentials');
+          throw new Error('Access token expired or invalid. Please check your WhatsApp API credentials in the .env file.');
+        } else if (errorData.error?.code === 10) {
+          throw new Error('Permission denied. Your access token may not have the required scopes to read flow assets.');
         }
         
-        throw new Error(`Failed to fetch flow asset: ${errorData.error?.message || 'Unknown error'}`);
+        throw new Error(`Failed to fetch flow asset: ${errorData.error?.message || 'Unknown error'} (Code: ${errorData.error?.code || 'N/A'})`);
       }
 
       const result = await response.json();
-      console.log('Flow data retrieved:', result);
+      console.log('📦 Flow data retrieved:', JSON.stringify(result, null, 2));
       
       // Handle different response formats
       
-      // Format 1: Direct asset data in 'data' array
+      // Format 1: Direct asset data in 'data' array (from /assets endpoint)
       if (result.data && Array.isArray(result.data) && result.data.length > 0) {
+        console.log('✅ Format 1: Found asset data in array');
         const latestAsset = result.data[0];
+        console.log('Latest asset:', latestAsset);
         
         if (typeof latestAsset.asset === 'string') {
           try {
-            return JSON.parse(latestAsset.asset);
+            const parsed = JSON.parse(latestAsset.asset);
+            console.log('✅ Successfully parsed asset string');
+            return parsed;
           } catch (e) {
-            console.error('Failed to parse asset string:', e);
+            console.error('❌ Failed to parse asset string:', e);
+            console.log('Returning unparsed asset');
             return latestAsset;
           }
         }
         
-        return latestAsset.asset || latestAsset;
+        if (latestAsset.asset && typeof latestAsset.asset === 'object') {
+          console.log('✅ Asset is already an object');
+          return latestAsset.asset;
+        }
+        
+        console.log('⚠️ Returning raw asset data');
+        return latestAsset;
       }
       
-      // Format 2: Flow details with preview URL
+      // Format 2: Flow details with preview URL (from flow details endpoint)
       if (result.preview && result.preview.preview_url) {
-        console.log('Flow has preview URL:', result.preview.preview_url);
-        // For now, return basic flow info since we can't directly parse preview
+        console.log('⚠️ Format 2: Flow has preview URL but no direct asset data');
+        console.log('Preview URL:', result.preview.preview_url);
+        
+        // Return info indicating preview is available
         return {
           screens: [],
           version: result.json_version || '3.0',
           data_api_version: result.data_api_version || '3.0',
-          _note: 'Preview available at: ' + result.preview.preview_url,
+          _note: `This flow is published but asset data is not directly accessible via API. You can view it in WhatsApp Business Manager.`,
           _flowInfo: result
         };
       }
       
       // Format 3: Check if result itself contains screens
-      if (result.screens) {
+      if (result.screens && Array.isArray(result.screens)) {
+        console.log('✅ Format 3: Found screens directly in result');
         return result;
       }
       
-      console.error('Unexpected response format:', result);
-      throw new Error('Flow asset data not found. The flow may not have any screens configured yet, or the asset format is not supported.');
+      // Format 4: Check if it's a flow details response without asset data
+      if (result.id && result.status) {
+        console.log('⚠️ Format 4: Got flow details but no asset/screen data');
+        console.log('Flow status:', result.status);
+        
+        return {
+          screens: [],
+          version: result.json_version || 'N/A',
+          data_api_version: result.data_api_version || 'N/A',
+          _note: `Flow is ${result.status} but screen data is not available through the API. This is normal for published flows. You can view and edit screens in WhatsApp Business Manager.`,
+          _flowInfo: result
+        };
+      }
+      
+      console.error('❌ Unexpected response format:', result);
+      throw new Error('Flow asset data not found. The API response format is not recognized. This may be a published flow where screen data is not directly accessible.');
     } catch (error) {
-      console.error('Error fetching flow asset:', error);
+      console.error('❌ Error fetching flow asset:', error);
       
       if (error instanceof Error) {
         throw error;
