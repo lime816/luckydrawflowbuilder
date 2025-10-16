@@ -116,7 +116,9 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
             {/* Render Children */}
             {screen.layout.children && screen.layout.children.length > 0 && (
               <div className="space-y-2 bg-gray-50 p-4 rounded-lg">
-                {screen.layout.children.map((child: any, idx: number) => (
+                {screen.layout.children.map((child: any, idx: number) => {
+                  console.log('Rendering child:', child);
+                  return (
                   <div key={idx} className="bg-white p-3 rounded border border-gray-200">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-semibold text-gray-500 uppercase">{typeof child.type === 'string' ? child.type : 'Component'}</span>
@@ -129,8 +131,8 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                     {child.text && typeof child.text === 'string' && (
                       <p className="text-sm text-gray-800">{child.text}</p>
                     )}
-                    {child.text && typeof child.text === 'object' && (
-                      <p className="text-sm text-gray-800">{JSON.stringify(child.text)}</p>
+                    {child.text && typeof child.text === 'object' && Object.keys(child.text).length > 0 && (
+                      <pre className="text-sm text-gray-800 bg-gray-50 p-2 rounded">{JSON.stringify(child.text, null, 2)}</pre>
                     )}
                     
                     {/* Input Elements */}
@@ -192,18 +194,33 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                         </button>
                       </div>
                     )}
+                    
+                    {/* Unknown/Other Components - Show raw data */}
+                    {!['TextBody', 'TextHeading', 'TextSubheading', 'TextInput', 'EmailInput', 'PhoneInput', 'Dropdown', 'CheckboxGroup', 'RadioButtonsGroup', 'Footer', 'Image', 'EmbeddedLink'].includes(child.type) && (
+                      <div className="mt-2 p-2 bg-gray-50 rounded">
+                        <p className="text-xs text-gray-600 mb-1">Component Properties:</p>
+                        <pre className="text-xs text-gray-700 overflow-x-auto">{JSON.stringify(child, null, 2)}</pre>
+                      </div>
+                    )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
         )}
 
         {/* Data API */}
-        {screen.data && (
+        {screen.data && typeof screen.data === 'string' && screen.data.trim() && (
           <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
             <p className="text-xs font-semibold text-blue-700 mb-1">Data API Endpoint</p>
-            <p className="text-xs text-blue-600 break-all">{typeof screen.data === 'string' ? screen.data : JSON.stringify(screen.data)}</p>
+            <p className="text-xs text-blue-600 break-all">{screen.data}</p>
+          </div>
+        )}
+        {screen.data && typeof screen.data === 'object' && Object.keys(screen.data).length > 0 && (
+          <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
+            <p className="text-xs font-semibold text-blue-700 mb-1">Data API Configuration</p>
+            <pre className="text-xs text-blue-600 break-all overflow-x-auto">{JSON.stringify(screen.data, null, 2)}</pre>
           </div>
         )}
       </div>
