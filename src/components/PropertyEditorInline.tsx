@@ -870,6 +870,165 @@ function renderFields(el: AnyElement, update: (field: string, value: any) => voi
         </>
       )
 
+    case 'PhotoPicker':
+      return (
+        <>
+          <div>
+            <label className="block text-xs font-medium text-slate-400 mb-1">Name</label>
+            <input
+              type="text"
+              value={el.name}
+              onChange={(e) => update('name', e.target.value)}
+              className="input-field text-sm"
+              placeholder="photo_picker"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-400 mb-1">Label</label>
+            <input
+              type="text"
+              value={el.label}
+              onChange={(e) => update('label', e.target.value)}
+              className="input-field text-sm"
+              placeholder="Upload Photos"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-400 mb-1">Description</label>
+            <input
+              type="text"
+              value={el.description || ''}
+              onChange={(e) => update('description', e.target.value)}
+              className="input-field text-sm"
+              placeholder="Select photos from gallery or camera"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-400 mb-1">Photo Source</label>
+            <select
+              value={el.photoSource || 'camera_gallery'}
+              onChange={(e) => update('photoSource', e.target.value)}
+              className="input-field text-sm"
+            >
+              <option value="camera_gallery">Camera & Gallery</option>
+              <option value="camera">Camera Only</option>
+              <option value="gallery">Gallery Only</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-400 mb-1">Max File Size (KB)</label>
+            <input
+              type="number"
+              value={el.maxFileSizeKb || 10240}
+              onChange={(e) => update('maxFileSizeKb', parseInt(e.target.value))}
+              className="input-field text-sm"
+              placeholder="10240"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-400 mb-1">Min Photos</label>
+            <input
+              type="number"
+              value={el.minUploadedPhotos || 0}
+              onChange={(e) => update('minUploadedPhotos', parseInt(e.target.value))}
+              className="input-field text-sm"
+              min="0"
+              max="30"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-400 mb-1">Max Photos</label>
+            <input
+              type="number"
+              value={el.maxUploadedPhotos || 10}
+              onChange={(e) => update('maxUploadedPhotos', parseInt(e.target.value))}
+              className="input-field text-sm"
+              min="1"
+              max="30"
+            />
+          </div>
+        </>
+      )
+
+    case 'DocumentPicker':
+      return (
+        <>
+          <div>
+            <label className="block text-xs font-medium text-slate-400 mb-1">Name</label>
+            <input
+              type="text"
+              value={el.name}
+              onChange={(e) => update('name', e.target.value)}
+              className="input-field text-sm"
+              placeholder="document_picker"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-400 mb-1">Label</label>
+            <input
+              type="text"
+              value={el.label}
+              onChange={(e) => update('label', e.target.value)}
+              className="input-field text-sm"
+              placeholder="Upload Documents"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-400 mb-1">Description</label>
+            <input
+              type="text"
+              value={el.description || ''}
+              onChange={(e) => update('description', e.target.value)}
+              className="input-field text-sm"
+              placeholder="Select documents to upload"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-400 mb-1">Max File Size (KB)</label>
+            <input
+              type="number"
+              value={el.maxFileSizeKb || 10240}
+              onChange={(e) => update('maxFileSizeKb', parseInt(e.target.value))}
+              className="input-field text-sm"
+              placeholder="10240"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-400 mb-1">Min Documents</label>
+            <input
+              type="number"
+              value={el.minUploadedDocuments || 0}
+              onChange={(e) => update('minUploadedDocuments', parseInt(e.target.value))}
+              className="input-field text-sm"
+              min="0"
+              max="30"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-400 mb-1">Max Documents</label>
+            <input
+              type="number"
+              value={el.maxUploadedDocuments || 10}
+              onChange={(e) => update('maxUploadedDocuments', parseInt(e.target.value))}
+              className="input-field text-sm"
+              min="1"
+              max="30"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-400 mb-1">Allowed MIME Types</label>
+            <input
+              type="text"
+              value={(el.allowedMimeTypes || []).join(', ')}
+              onChange={(e) => update('allowedMimeTypes', e.target.value.split(',').map((s: string) => s.trim()))}
+              className="input-field text-sm"
+              placeholder="application/pdf, image/jpeg, image/png"
+            />
+            <p className="text-xs text-slate-500 mt-1">Comma-separated list</p>
+          </div>
+        </>
+      )
+
     case 'NavigationList':
       return (
         <>

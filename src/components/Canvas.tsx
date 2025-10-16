@@ -423,6 +423,51 @@ function Preview({ el, onClick, isSelected }: { el: any; onClick: () => void; is
           </div>
         </div>
       )
+    case 'PhotoPicker':
+      return (
+        <div onClick={onClick} className={baseClass}>
+          <label className="text-sm font-medium text-gray-700 block mb-2">{el.label || 'Photo Picker'}</label>
+          {el.description && <p className="text-xs text-gray-500 mb-2">{el.description}</p>}
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-gray-50">
+            <div className="w-10 h-10 mx-auto mb-2 bg-blue-100 rounded-full flex items-center justify-center">
+              <span className="text-xl">📷</span>
+            </div>
+            <p className="text-xs text-gray-600">Upload Photos</p>
+            <p className="text-xs text-gray-400 mt-1">
+              {el.photoSource === 'camera' ? 'Camera' : el.photoSource === 'gallery' ? 'Gallery' : 'Camera/Gallery'}
+            </p>
+            {(el.minUploadedPhotos || el.maxUploadedPhotos) && (
+              <p className="text-xs text-gray-400 mt-1">
+                {el.minUploadedPhotos || 0}-{el.maxUploadedPhotos || 30} photos
+              </p>
+            )}
+          </div>
+        </div>
+      )
+    case 'DocumentPicker':
+      return (
+        <div onClick={onClick} className={baseClass}>
+          <label className="text-sm font-medium text-gray-700 block mb-2">{el.label || 'Document Picker'}</label>
+          {el.description && <p className="text-xs text-gray-500 mb-2">{el.description}</p>}
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-gray-50">
+            <div className="w-10 h-10 mx-auto mb-2 bg-green-100 rounded-full flex items-center justify-center">
+              <span className="text-xl">📄</span>
+            </div>
+            <p className="text-xs text-gray-600">Upload Documents</p>
+            {el.allowedMimeTypes && el.allowedMimeTypes.length > 0 && (
+              <p className="text-xs text-gray-400 mt-1">
+                {el.allowedMimeTypes.slice(0, 2).join(', ')}
+                {el.allowedMimeTypes.length > 2 && '...'}
+              </p>
+            )}
+            {(el.minUploadedDocuments || el.maxUploadedDocuments) && (
+              <p className="text-xs text-gray-400 mt-1">
+                {el.minUploadedDocuments || 0}-{el.maxUploadedDocuments || 30} docs
+              </p>
+            )}
+          </div>
+        </div>
+      )
     case 'NavigationList':
       return (
         <div onClick={onClick} className={baseClass}>

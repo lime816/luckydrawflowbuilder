@@ -146,6 +146,10 @@ function getExampleValue(elementType: string): string {
     case 'DatePicker':
     case 'CalendarPicker':
       return '2024-01-01'
+    case 'PhotoPicker':
+      return '["media_id_1", "media_id_2"]'
+    case 'DocumentPicker':
+      return '["media_id_1"]'
     default:
       return 'Sample value'
   }
@@ -500,7 +504,9 @@ function isFormElement(element: any): boolean {
   const formElementTypes = [
     'TextInput', 'EmailInput', 'PasswordInput', 'PhoneInput', 'TextArea',
     'CheckboxGroup', 'RadioButtonsGroup', 'ChipsSelector', 'Dropdown', 'OptIn',
-    'DatePicker', 'CalendarPicker'
+    'DatePicker', 'CalendarPicker',
+    'PhotoPicker', 'DocumentPicker',  // Media upload components MUST be in Form
+    'Footer'  // Footer should be in Form when collecting form data
   ]
   return formElementTypes.includes(element.type)
 }
