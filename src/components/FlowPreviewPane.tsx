@@ -148,8 +148,8 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                           className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
                           disabled
                         />
-                        {child['helper-text'] && typeof child['helper-text'] === 'string' && (
-                          <p className="text-xs text-gray-500 mt-1">{child['helper-text']}</p>
+                        {(child['helper-text'] || child.helperText) && typeof (child['helper-text'] || child.helperText) === 'string' && (
+                          <p className="text-xs text-gray-500 mt-1">{child['helper-text'] || child.helperText}</p>
                         )}
                         {child.required && (
                           <p className="text-xs text-red-500 mt-1">* Required</p>
@@ -165,7 +165,7 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                         )}
                         <select className="w-full px-3 py-2 border border-gray-300 rounded text-sm" disabled>
                           <option>Select an option</option>
-                          {child['data-source']?.map((option: any, i: number) => (
+                          {(child['data-source'] || child.dataSource || child.options)?.map((option: any, i: number) => (
                             <option key={i}>{typeof option.title === 'string' ? option.title : option.id || 'Option'}</option>
                           ))}
                         </select>
@@ -182,7 +182,7 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                           <p className="text-sm font-medium text-gray-700 mb-2">{child.label}</p>
                         )}
                         <div className="space-y-2">
-                          {child['data-source']?.map((option: any, i: number) => (
+                          {(child['data-source'] || child.dataSource || child.options)?.map((option: any, i: number) => (
                             <label key={i} className="flex items-center gap-2 text-sm">
                               <input type="checkbox" disabled />
                               <span>{typeof option.title === 'string' ? option.title : option.id || 'Option'}</span>
@@ -202,7 +202,7 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                           <p className="text-sm font-medium text-gray-700 mb-2">{child.label}</p>
                         )}
                         <div className="space-y-2">
-                          {child['data-source']?.map((option: any, i: number) => (
+                          {(child['data-source'] || child.dataSource || child.options)?.map((option: any, i: number) => (
                             <label key={i} className="flex items-center gap-2 text-sm">
                               <input type="radio" name={child.name} disabled />
                               <span>{typeof option.title === 'string' ? option.title : option.id || 'Option'}</span>
@@ -289,22 +289,22 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                             </div>
                             <p className="text-sm font-medium text-gray-700">Upload Photos</p>
                             <p className="text-xs text-gray-500">
-                              {child['photo-source'] === 'camera' ? 'Take a photo' : 
-                               child['photo-source'] === 'gallery' ? 'Select from gallery' : 
+                              {(child['photo-source'] || child.photoSource) === 'camera' ? 'Take a photo' : 
+                               (child['photo-source'] || child.photoSource) === 'gallery' ? 'Select from gallery' : 
                                'Camera or Gallery'}
                             </p>
-                            {child['max-file-size-kb'] && (
-                              <p className="text-xs text-gray-400">Max size: {child['max-file-size-kb']} KB</p>
+                            {(child['max-file-size-kb'] || child.maxFileSizeKb) && (
+                              <p className="text-xs text-gray-400">Max size: {child['max-file-size-kb'] || child.maxFileSizeKb} KB</p>
                             )}
-                            {(child['min-uploaded-photos'] || child['max-uploaded-photos']) && (
+                            {(child['min-uploaded-photos'] || child.minUploadedPhotos || child['max-uploaded-photos'] || child.maxUploadedPhotos) && (
                               <p className="text-xs text-gray-400">
-                                {child['min-uploaded-photos'] || 0} - {child['max-uploaded-photos'] || 30} photos
+                                {child['min-uploaded-photos'] || child.minUploadedPhotos || 0} - {child['max-uploaded-photos'] || child.maxUploadedPhotos || 30} photos
                               </p>
                             )}
                           </div>
                         </div>
-                        {child['min-uploaded-photos'] > 0 && (
-                          <p className="text-xs text-red-500 mt-1">* Required (min {child['min-uploaded-photos']} photos)</p>
+                        {(child['min-uploaded-photos'] || child.minUploadedPhotos) > 0 && (
+                          <p className="text-xs text-red-500 mt-1">* Required (min {child['min-uploaded-photos'] || child.minUploadedPhotos} photos)</p>
                         )}
                       </div>
                     )}
@@ -324,24 +324,24 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                               <span className="text-2xl">📄</span>
                             </div>
                             <p className="text-sm font-medium text-gray-700">Upload Documents</p>
-                            {child['allowed-mime-types'] && Array.isArray(child['allowed-mime-types']) && (
+                            {(child['allowed-mime-types'] || child.allowedMimeTypes) && Array.isArray(child['allowed-mime-types'] || child.allowedMimeTypes) && (
                               <p className="text-xs text-gray-500">
-                                Allowed: {child['allowed-mime-types'].slice(0, 3).join(', ')}
-                                {child['allowed-mime-types'].length > 3 && '...'}
+                                Allowed: {(child['allowed-mime-types'] || child.allowedMimeTypes).slice(0, 3).join(', ')}
+                                {(child['allowed-mime-types'] || child.allowedMimeTypes).length > 3 && '...'}
                               </p>
                             )}
-                            {child['max-file-size-kb'] && (
-                              <p className="text-xs text-gray-400">Max size: {child['max-file-size-kb']} KB</p>
+                            {(child['max-file-size-kb'] || child.maxFileSizeKb) && (
+                              <p className="text-xs text-gray-400">Max size: {child['max-file-size-kb'] || child.maxFileSizeKb} KB</p>
                             )}
-                            {(child['min-uploaded-documents'] || child['max-uploaded-documents']) && (
+                            {(child['min-uploaded-documents'] || child.minUploadedDocuments || child['max-uploaded-documents'] || child.maxUploadedDocuments) && (
                               <p className="text-xs text-gray-400">
-                                {child['min-uploaded-documents'] || 0} - {child['max-uploaded-documents'] || 30} documents
+                                {child['min-uploaded-documents'] || child.minUploadedDocuments || 0} - {child['max-uploaded-documents'] || child.maxUploadedDocuments || 30} documents
                               </p>
                             )}
                           </div>
                         </div>
-                        {child['min-uploaded-documents'] > 0 && (
-                          <p className="text-xs text-red-500 mt-1">* Required (min {child['min-uploaded-documents']} documents)</p>
+                        {(child['min-uploaded-documents'] || child.minUploadedDocuments) > 0 && (
+                          <p className="text-xs text-red-500 mt-1">* Required (min {child['min-uploaded-documents'] || child.minUploadedDocuments} documents)</p>
                         )}
                       </div>
                     )}
