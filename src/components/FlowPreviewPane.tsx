@@ -288,7 +288,10 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                     
                     {flowAsset._flowInfo?.preview?.download_url && (
                       <button
-                        onClick={() => window.open(flowAsset._flowInfo.preview.download_url, '_blank')}
+                        onClick={() => {
+                          const url = flowAsset._flowInfo?.preview?.download_url;
+                          if (url) window.open(url, '_blank');
+                        }}
                         className="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                       >
                         <ExternalLink className="w-4 h-4" />
