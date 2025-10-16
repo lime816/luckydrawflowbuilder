@@ -1,14 +1,16 @@
 import { useState, useCallback, useEffect } from 'react'
-import { Moon, Sun, Download, Plus, Code2, MessageCircle, Send, QrCode, Globe, Library } from 'lucide-react'
+import { Moon, Sun, Download, Plus, Code2, MessageCircle, Send, QrCode, Globe, Library, Zap } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ScreenDesigner from './screens/ScreenDesigner'
 import JsonPreviewPanel from './components/JsonPreviewPanel'
 import WhatsAppPreview from './components/WhatsAppPreview'
+import FlowXPPanel from './components/FlowXPPanel'
 import QRCodeGenerator from './components/QRCodeGenerator'
 import QRFlowInitiator from './components/QRFlowInitiator'
 import WebhookSetup from './components/WebhookSetup'
 import MessageLibrary from './components/MessageLibrary'
 import { useFlowStore } from './state/store'
+import { useMessageLibraryStore } from './state/messageLibraryStore'
 import { buildFlowJson } from './utils/jsonBuilder'
 import { downloadText } from './utils/fileWriter'
 import { sendTestFlow } from './utils/whatsappSender'
@@ -19,11 +21,11 @@ import { ToastData, ToastType } from './components/Toast'
 
 export default function App() {
   const { screens, addScreen } = useFlowStore()
-  
-
+  const { messages, triggers } = useMessageLibraryStore()
 
   const [showJsonPreview, setShowJsonPreview] = useState(false)
   const [showWhatsAppPreview, setShowWhatsAppPreview] = useState(false)
+  const [showFlowXP, setShowFlowXP] = useState(false)
   const [showSendDialog, setShowSendDialog] = useState(false)
   const [phoneNumber, setPhoneNumber] = useState('918281348343')
   const [isSending, setIsSending] = useState(false)
@@ -792,6 +794,15 @@ Preview URL: ${result.preview_url || 'Not available'}
               >
                 <Code2 className="w-4 h-4" />
                 <span className="hidden sm:inline">JSON Preview</span>
+              </button>
+
+              <button
+                onClick={() => setShowFlowXP(!showFlowXP)}
+                className={`btn-secondary flex items-center gap-2 ${showFlowXP ? 'bg-primary-500/20 border-primary-500' : ''}`}
+                title="Flow Experience - Configure message sequence"
+              >
+                <Zap className="w-4 h-4" />
+                <span className="hidden sm:inline">FlowXP</span>
               </button>
 
               <button
@@ -1605,6 +1616,17 @@ Preview URL: ${result.preview_url || 'Not available'}
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* FlowXP Modal */}
+      <AnimatePresence>
+        {showFlowXP && (
+          <FlowXPPanel 
+            onClose={() => setShowFlowXP(false)} 
+            availableFlows={allFlows}
+            availableMessages={messages}
+          />
         )}
       </AnimatePresence>
 
