@@ -119,6 +119,26 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
               <div className="space-y-2 bg-gray-50 p-4 rounded-lg">
                 {screen.layout.children.map((child: any, idx: number) => {
                   console.log('Rendering child:', child);
+                  
+                  // Handle Form component - render its children instead
+                  if (child.type === 'Form' && child.children && Array.isArray(child.children)) {
+                    return (
+                      <div key={idx} className="space-y-2">
+                        {child.children.map((formChild: any, formIdx: number) => (
+                          <div key={`${idx}-${formIdx}`} className="bg-white p-3 rounded border border-gray-200">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-semibold text-gray-500 uppercase">{typeof formChild.type === 'string' ? formChild.type : 'Component'}</span>
+                              {formChild.name && typeof formChild.name === 'string' && (
+                                <span className="text-xs text-gray-400">name: {formChild.name}</span>
+                              )}
+                            </div>
+                            {renderFormElement(formChild)}
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  }
+                  
                   return (
                   <div key={idx} className="bg-white p-3 rounded border border-gray-200">
                     <div className="flex items-center justify-between mb-2">
@@ -128,13 +148,43 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                       )}
                     </div>
                     
-                    {/* Text Elements */}
-                    {child.text && typeof child.text === 'string' && (
-                      <p className="text-sm text-gray-800">{child.text}</p>
-                    )}
-                    {child.text && typeof child.text === 'object' && Object.keys(child.text).length > 0 && (
-                      <pre className="text-sm text-gray-800 bg-gray-50 p-2 rounded">{JSON.stringify(child.text, null, 2)}</pre>
-                    )}
+                    {renderFormElement(child)}
+                  </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Data API */}
+        {screen.data && typeof screen.data === 'string' && screen.data.trim() && (
+          <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
+            <p className="text-xs font-semibold text-blue-700 mb-1">Data API Endpoint</p>
+            <p className="text-xs text-blue-600 break-all">{screen.data}</p>
+          </div>
+        )}
+        {screen.data && typeof screen.data === 'object' && Object.keys(screen.data).length > 0 && (
+          <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
+            <p className="text-xs font-semibold text-blue-700 mb-1">Data API Configuration</p>
+            <pre className="text-xs text-blue-600 break-all overflow-x-auto">{JSON.stringify(screen.data, null, 2)}</pre>
+          </div>
+        )}
+      </div>
+    )
+  }
+  
+  // Helper function to render form elements
+  const renderFormElement = (child: any) => {
+    return (
+      <>
+        {/* Text Elements */}
+        {child.text && typeof child.text === 'string' && (
+          <p className="text-sm text-gray-800">{child.text}</p>
+        )}
+        {child.text && typeof child.text === 'object' && Object.keys(child.text).length > 0 && (
+          <pre className="text-sm text-gray-800 bg-gray-50 p-2 rounded">{JSON.stringify(child.text, null, 2)}</pre>
+        )}
                     
                     {/* Input Elements */}
                     {(child.type === 'TextInput' || child.type === 'EmailInput' || child.type === 'PhoneInput') && (
@@ -356,35 +406,14 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                     )}
                     
                     {/* Unknown/Other Components - Show raw data */}
-                    {!['TextBody', 'TextHeading', 'TextSubheading', 'TextCaption', 'RichText', 'TextInput', 'EmailInput', 'PasswordInput', 'PhoneInput', 'TextArea', 'Dropdown', 'CheckboxGroup', 'RadioButtonsGroup', 'ChipsSelector', 'OptIn', 'Footer', 'Image', 'ImageCarousel', 'PhotoPicker', 'DocumentPicker', 'EmbeddedLink', 'DatePicker', 'CalendarPicker', 'NavigationList'].includes(child.type) && (
+                    {!['TextBody', 'TextHeading', 'TextSubheading', 'TextCaption', 'RichText', 'TextInput', 'EmailInput', 'PasswordInput', 'PhoneInput', 'TextArea', 'Dropdown', 'CheckboxGroup', 'RadioButtonsGroup', 'ChipsSelector', 'OptIn', 'Footer', 'Image', 'ImageCarousel', 'PhotoPicker', 'DocumentPicker', 'EmbeddedLink', 'DatePicker', 'CalendarPicker', 'NavigationList', 'Form'].includes(child.type) && (
                       <div className="mt-2 p-2 bg-gray-50 rounded">
                         <p className="text-xs text-gray-600 mb-1">Component Properties:</p>
                         <pre className="text-xs text-gray-700 overflow-x-auto">{JSON.stringify(child, null, 2)}</pre>
                       </div>
                     )}
-                  </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Data API */}
-        {screen.data && typeof screen.data === 'string' && screen.data.trim() && (
-          <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
-            <p className="text-xs font-semibold text-blue-700 mb-1">Data API Endpoint</p>
-            <p className="text-xs text-blue-600 break-all">{screen.data}</p>
-          </div>
-        )}
-        {screen.data && typeof screen.data === 'object' && Object.keys(screen.data).length > 0 && (
-          <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
-            <p className="text-xs font-semibold text-blue-700 mb-1">Data API Configuration</p>
-            <pre className="text-xs text-blue-600 break-all overflow-x-auto">{JSON.stringify(screen.data, null, 2)}</pre>
-          </div>
-        )}
-      </div>
-    )
+      </>
+    );
   }
 
   return (
