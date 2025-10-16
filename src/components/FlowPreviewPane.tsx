@@ -99,8 +99,8 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
     return (
       <div className="bg-white rounded-lg p-6 border border-gray-200">
         <div className="mb-4">
-          <h4 className="text-lg font-bold text-gray-900 mb-1">{screen.title || 'Untitled Screen'}</h4>
-          <p className="text-sm text-gray-500">ID: {screen.id}</p>
+          <h4 className="text-lg font-bold text-gray-900 mb-1">{typeof screen.title === 'string' ? screen.title : 'Untitled Screen'}</h4>
+          <p className="text-sm text-gray-500">ID: {typeof screen.id === 'string' ? screen.id : JSON.stringify(screen.id)}</p>
           {screen.terminal && (
             <span className="inline-block mt-2 px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
               Terminal Screen
@@ -111,7 +111,7 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
         {/* Screen Layout */}
         {screen.layout && (
           <div className="space-y-3">
-            <h5 className="font-semibold text-gray-700 text-sm">Layout: {screen.layout.type}</h5>
+            <h5 className="font-semibold text-gray-700 text-sm">Layout: {typeof screen.layout.type === 'string' ? screen.layout.type : 'Unknown'}</h5>
             
             {/* Render Children */}
             {screen.layout.children && screen.layout.children.length > 0 && (
@@ -119,8 +119,8 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                 {screen.layout.children.map((child: any, idx: number) => (
                   <div key={idx} className="bg-white p-3 rounded border border-gray-200">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-semibold text-gray-500 uppercase">{child.type}</span>
-                      {child.name && (
+                      <span className="text-xs font-semibold text-gray-500 uppercase">{typeof child.type === 'string' ? child.type : 'Component'}</span>
+                      {child.name && typeof child.name === 'string' && (
                         <span className="text-xs text-gray-400">name: {child.name}</span>
                       )}
                     </div>
@@ -203,7 +203,7 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
         {screen.data && (
           <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
             <p className="text-xs font-semibold text-blue-700 mb-1">Data API Endpoint</p>
-            <p className="text-xs text-blue-600 break-all">{screen.data}</p>
+            <p className="text-xs text-blue-600 break-all">{typeof screen.data === 'string' ? screen.data : JSON.stringify(screen.data)}</p>
           </div>
         )}
       </div>
@@ -285,7 +285,7 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                               : 'bg-white text-gray-700 border border-gray-200 hover:border-primary-300'
                           }`}
                         >
-                          {screen.title || `Screen ${index + 1}`}
+                          {typeof screen.title === 'string' ? screen.title : `Screen ${index + 1}`}
                         </button>
                       ))}
                     </div>
