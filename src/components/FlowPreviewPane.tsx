@@ -116,42 +116,41 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
             
             {/* Render Children */}
             {screen.layout.children && screen.layout.children.length > 0 && (
-              <div className="space-y-2 bg-gray-50 p-4 rounded-lg">
-                {screen.layout.children.map((child: any, idx: number) => {
-                  console.log('Rendering child:', child);
-                  
-                  // Handle Form component - render its children instead
-                  if (child.type === 'Form' && child.children && Array.isArray(child.children)) {
-                    return (
-                      <div key={idx} className="space-y-2">
-                        {child.children.map((formChild: any, formIdx: number) => (
-                          <div key={`${idx}-${formIdx}`} className="bg-white p-3 rounded border border-gray-200">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-xs font-semibold text-gray-500 uppercase">{typeof formChild.type === 'string' ? formChild.type : 'Component'}</span>
-                              {formChild.name && typeof formChild.name === 'string' && (
-                                <span className="text-xs text-gray-400">name: {formChild.name}</span>
-                              )}
+              <div className="space-y-3">
+                {/* Separate Footer from other components */}
+                {screen.layout.children
+                  .filter((child: any) => child.type !== 'Footer')
+                  .map((child: any, idx: number) => {
+                    console.log('Rendering child:', child);
+                    
+                    // Handle Form component - render its children instead
+                    if (child.type === 'Form' && child.children && Array.isArray(child.children)) {
+                      return (
+                        <div key={idx} className="space-y-3">
+                          {child.children.map((formChild: any, formIdx: number) => (
+                            <div key={`${idx}-${formIdx}`} className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                              {renderFormElement(formChild)}
                             </div>
-                            {renderFormElement(formChild)}
-                          </div>
-                        ))}
+                          ))}
+                        </div>
+                      );
+                    }
+                    
+                    return (
+                      <div key={idx} className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                        {renderFormElement(child)}
                       </div>
                     );
-                  }
-                  
-                  return (
-                  <div key={idx} className="bg-white p-3 rounded border border-gray-200">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-semibold text-gray-500 uppercase">{typeof child.type === 'string' ? child.type : 'Component'}</span>
-                      {child.name && typeof child.name === 'string' && (
-                        <span className="text-xs text-gray-400">name: {child.name}</span>
-                      )}
+                  })}
+                
+                {/* Render Footer at the bottom */}
+                {screen.layout.children
+                  .filter((child: any) => child.type === 'Footer')
+                  .map((child: any, idx: number) => (
+                    <div key={`footer-${idx}`} className="mt-4 pt-4 border-t border-gray-200">
+                      {renderFormElement(child)}
                     </div>
-                    
-                    {renderFormElement(child)}
-                  </div>
-                  );
-                })}
+                  ))}
               </div>
             )}
           </div>
@@ -179,8 +178,13 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
     return (
       <>
         {/* Text Elements */}
-        {child.text && typeof child.text === 'string' && (
-          <p className="text-sm text-gray-800">{child.text}</p>
+        {(child.type === 'TextHeading' || child.type === 'TextSubheading' || child.type === 'TextBody' || child.type === 'TextCaption') && child.text && typeof child.text === 'string' && (
+          <div>
+            {child.type === 'TextHeading' && <h3 className="text-xl font-bold text-gray-900">{child.text}</h3>}
+            {child.type === 'TextSubheading' && <h4 className="text-lg font-semibold text-gray-800">{child.text}</h4>}
+            {child.type === 'TextBody' && <p className="text-base text-gray-700">{child.text}</p>}
+            {child.type === 'TextCaption' && <p className="text-sm text-gray-600">{child.text}</p>}
+          </div>
         )}
         {child.text && typeof child.text === 'object' && Object.keys(child.text).length > 0 && (
           <pre className="text-sm text-gray-800 bg-gray-50 p-2 rounded">{JSON.stringify(child.text, null, 2)}</pre>
@@ -188,21 +192,21 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                     
                     {/* Input Elements */}
                     {(child.type === 'TextInput' || child.type === 'EmailInput' || child.type === 'PhoneInput') && (
-                      <div className="mt-2">
+                      <div>
                         {child.label && typeof child.label === 'string' && (
-                          <label className="block text-sm font-medium text-gray-700 mb-1">{child.label}</label>
+                          <label className="block text-base font-semibold text-gray-900 mb-2">{child.label}</label>
                         )}
                         <input
                           type={child.type === 'EmailInput' ? 'email' : child.type === 'PhoneInput' ? 'tel' : 'text'}
                           placeholder={typeof child.label === 'string' ? child.label : 'Input field'}
-                          className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20 outline-none transition-all"
                           disabled
                         />
                         {(child['helper-text'] || child.helperText) && typeof (child['helper-text'] || child.helperText) === 'string' && (
-                          <p className="text-xs text-gray-500 mt-1">{child['helper-text'] || child.helperText}</p>
+                          <p className="text-sm text-gray-500 mt-2">{child['helper-text'] || child.helperText}</p>
                         )}
                         {child.required && (
-                          <p className="text-xs text-red-500 mt-1">* Required</p>
+                          <p className="text-sm text-red-500 mt-1">* Required</p>
                         )}
                       </div>
                     )}
@@ -247,20 +251,25 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                     
                     {/* RadioButtonsGroup */}
                     {child.type === 'RadioButtonsGroup' && (
-                      <div className="mt-2">
+                      <div>
                         {child.label && typeof child.label === 'string' && (
-                          <p className="text-sm font-medium text-gray-700 mb-2">{child.label}</p>
+                          <p className="text-base font-semibold text-gray-900 mb-3">{child.label}</p>
                         )}
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           {(child['data-source'] || child.dataSource || child.options)?.map((option: any, i: number) => (
-                            <label key={i} className="flex items-center gap-2 text-sm">
-                              <input type="radio" name={child.name} disabled />
-                              <span>{typeof option.title === 'string' ? option.title : option.id || 'Option'}</span>
+                            <label key={i} className="flex items-center gap-3 text-base cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors">
+                              <input 
+                                type="radio" 
+                                name={child.name} 
+                                className="w-5 h-5 text-[#25D366] focus:ring-[#25D366]" 
+                                disabled 
+                              />
+                              <span className="text-gray-800">{typeof option.title === 'string' ? option.title : option.id || 'Option'}</span>
                             </label>
                           ))}
                         </div>
                         {child.required && (
-                          <p className="text-xs text-red-500 mt-1">* Required</p>
+                          <p className="text-sm text-red-500 mt-2">* Required</p>
                         )}
                       </div>
                     )}
@@ -398,11 +407,9 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                     
                     {/* Footer Buttons */}
                     {child.type === 'Footer' && (
-                      <div className="mt-2">
-                        <button className="w-full px-4 py-2 bg-primary-600 text-white rounded text-sm font-medium">
-                          {typeof child.label === 'string' ? child.label : 'Continue'}
-                        </button>
-                      </div>
+                      <button className="w-full px-6 py-3 bg-[#25D366] hover:bg-[#20BD5A] text-white rounded-lg text-base font-semibold shadow-md transition-colors">
+                        {typeof child.label === 'string' ? child.label : 'Continue'}
+                      </button>
                     )}
                     
                     {/* Unknown/Other Components - Show raw data */}
