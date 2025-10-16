@@ -1062,23 +1062,62 @@ export class WhatsAppService {
     try {
       console.log('📥 Fetching flow JSON from download URL:', downloadUrl);
       
-      const response = await fetch(downloadUrl, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.accessToken}`
-        }
-      });
+      // Strategy 1: Try with authorization header
+      try {
+        console.log('🔑 Attempting with authorization header...');
+        const response = await fetch(downloadUrl, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${this.accessToken}`
+          },
+          mode: 'cors'
+        });
 
-      if (!response.ok) {
-        console.error('Failed to fetch from download URL:', response.status);
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        if (response.ok) {
+          const jsonData = await response.json();
+          console.log('✅ Flow JSON fetched successfully with auth:', jsonData);
+          return jsonData;
+        }
+        console.warn('⚠️ Auth fetch failed:', response.status);
+      } catch (authError) {
+        console.warn('⚠️ Auth fetch error:', authError);
       }
 
-      const jsonData = await response.json();
-      console.log('✅ Flow JSON fetched successfully:', jsonData);
-      return jsonData;
+      // Strategy 2: Try without authorization (signed URLs don't need auth)
+      try {
+        console.log('🔓 Attempting without authorization header...');
+        const response = await fetch(downloadUrl, {
+          method: 'GET',
+          mode: 'cors'
+        });
+
+        if (response.ok) {
+          const jsonData = await response.json();
+          console.log('✅ Flow JSON fetched successfully without auth:', jsonData);
+          return jsonData;
+        }
+        console.warn('⚠️ No-auth fetch failed:', response.status);
+      } catch (noAuthError) {
+        console.warn('⚠️ No-auth fetch error:', noAuthError);
+      }
+
+      // Strategy 3: Try with no-cors mode (last resort)
+      try {
+        console.log('🌐 Attempting with no-cors mode...');
+        const response = await fetch(downloadUrl, {
+          method: 'GET',
+          mode: 'no-cors'
+        });
+
+        // Note: no-cors mode doesn't allow reading the response
+        console.warn('⚠️ No-cors mode succeeded but cannot read response');
+      } catch (noCorsError) {
+        console.warn('⚠️ No-cors fetch error:', noCorsError);
+      }
+
+      throw new Error('All fetch strategies failed. The download URL may have CORS restrictions or may have expired.');
     } catch (error) {
-      console.error('Error fetching flow JSON from download URL:', error);
+      console.error('❌ Error fetching flow JSON from download URL:', error);
       throw error;
     }
   }

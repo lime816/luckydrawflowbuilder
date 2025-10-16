@@ -18,6 +18,7 @@ interface FlowAsset {
   _flowInfo?: {
     preview?: {
       preview_url?: string
+      download_url?: string
     }
     [key: string]: any
   }
@@ -269,13 +270,13 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
               ) : (
                 <div className="flex flex-col items-center justify-center py-12 bg-white rounded-lg border border-gray-200">
                   <AlertCircle className="w-12 h-12 text-yellow-500 mb-4" />
-                  <p className="text-gray-900 font-medium mb-2">No Screens Available</p>
+                  <p className="text-gray-900 font-medium mb-2">Screen Data Not Accessible</p>
                   <p className="text-sm text-gray-600 mb-4 text-center max-w-md">
-                    {flowAsset._note || "Unable to load flow screens. The flow may be empty or the download URL is not accessible."}
+                    {flowAsset._note || "Unable to load flow screens due to CORS restrictions. This is a limitation of WhatsApp's API."}
                   </p>
                   
-                  {previewUrl && (
-                    <div className="space-y-3 w-full max-w-md">
+                  <div className="space-y-3 w-full max-w-md">
+                    {previewUrl && (
                       <button
                         onClick={() => window.open(previewUrl, '_blank', 'width=400,height=700')}
                         className="w-full px-4 py-3 bg-whatsapp-500 hover:bg-whatsapp-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
@@ -283,14 +284,30 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                         <ExternalLink className="w-4 h-4" />
                         Open WhatsApp Preview
                       </button>
-                      
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <p className="text-xs text-blue-700">
-                          Opens the official WhatsApp flow preview in a new window
-                        </p>
-                      </div>
+                    )}
+                    
+                    {flowAsset._flowInfo?.preview?.download_url && (
+                      <button
+                        onClick={() => window.open(flowAsset._flowInfo.preview.download_url, '_blank')}
+                        className="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        Download Flow JSON
+                      </button>
+                    )}
+                    
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                      <p className="text-sm text-amber-800 mb-2">
+                        <strong>Why can't I see the screens?</strong>
+                      </p>
+                      <p className="text-xs text-amber-700 mb-2">
+                        WhatsApp's download URLs have CORS restrictions that prevent direct access from web browsers.
+                      </p>
+                      <p className="text-xs text-amber-700">
+                        <strong>Workaround:</strong> Use the buttons above to view the flow in WhatsApp's preview or download the JSON directly.
+                      </p>
                     </div>
-                  )}
+                  </div>
                 </div>
               )}
 
