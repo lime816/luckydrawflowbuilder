@@ -101,6 +101,8 @@ export type TextAreaEl = BaseElement & {
   label: string
   name: string
   required?: boolean
+  maxLength?: number
+  helperText?: string
 }
 
 export type DropdownEl = BaseElement & {

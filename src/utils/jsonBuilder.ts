@@ -77,10 +77,14 @@ function buildScreen(s: Screen, si: number, all: Screen[]) {
   
   // If there are form elements, wrap them in a Form component
   if (formElements.length > 0) {
+    // CRITICAL: Footer MUST be the last element in Form children
+    const footerElements = formElements.filter(el => el.type === 'Footer')
+    const otherFormElements = formElements.filter(el => el.type !== 'Footer')
+    
     children.push({
       type: 'Form',
       name: 'flow_path',
-      children: formElements
+      children: [...otherFormElements, ...footerElements]  // Footer at the end
     })
   }
   
@@ -181,12 +185,12 @@ function mapElement(el: AnyElement, si: number, ei: number, currentScreen?: Scre
       return { type: 'RichText', text: el.text, ...(el.visible !== undefined && { visible: el.visible }) }
     case 'TextInput': {
       const result: any = { 
-        type: 'TextInput', 
+        type: 'TextInput',
+        'input-type': el.inputType || 'text',  // Default to 'text' if not specified
         label: el.label, 
         name: el.name
       }
       if (el.required !== undefined) result.required = el.required
-      if (el.inputType) result['input-type'] = el.inputType
       if (el.pattern) result.pattern = el.pattern
       if (el.helperText) result['helper-text'] = el.helperText
       if (el.minChars) result['min-chars'] = el.minChars
@@ -275,6 +279,8 @@ function mapElement(el: AnyElement, si: number, ei: number, currentScreen?: Scre
         name: el.name
       }
       if (el.required !== undefined) result.required = el.required
+      if (el.maxLength) result['max-length'] = el.maxLength
+      if (el.helperText) result['helper-text'] = el.helperText
       return result
     }
     case 'Dropdown': {
@@ -353,13 +359,13 @@ function mapElement(el: AnyElement, si: number, ei: number, currentScreen?: Scre
       const result: any = { 
         type: 'PhotoPicker', 
         name: el.name,
-        label: el.label
+        label: el.label,
+        'photo-source': el.photoSource || 'camera_gallery',
+        'min-uploaded-photos': el.minUploadedPhotos !== undefined ? el.minUploadedPhotos : 0,
+        'max-uploaded-photos': el.maxUploadedPhotos || 10,
+        'max-file-size-kb': el.maxFileSizeKb || 10240
       }
       if (el.description) result.description = el.description
-      if (el.photoSource) result['photo-source'] = el.photoSource
-      if (el.maxFileSizeKb) result['max-file-size-kb'] = el.maxFileSizeKb
-      if (el.minUploadedPhotos !== undefined) result['min-uploaded-photos'] = el.minUploadedPhotos
-      if (el.maxUploadedPhotos) result['max-uploaded-photos'] = el.maxUploadedPhotos
       if (el.enabled !== undefined) result.enabled = el.enabled
       if (el.visible !== undefined) result.visible = el.visible
       if (el.errorMessage) result['error-message'] = el.errorMessage
@@ -369,12 +375,12 @@ function mapElement(el: AnyElement, si: number, ei: number, currentScreen?: Scre
       const result: any = { 
         type: 'DocumentPicker', 
         name: el.name,
-        label: el.label
+        label: el.label,
+        'min-uploaded-documents': el.minUploadedDocuments !== undefined ? el.minUploadedDocuments : 0,
+        'max-uploaded-documents': el.maxUploadedDocuments || 10,
+        'max-file-size-kb': el.maxFileSizeKb || 10240
       }
       if (el.description) result.description = el.description
-      if (el.maxFileSizeKb) result['max-file-size-kb'] = el.maxFileSizeKb
-      if (el.minUploadedDocuments !== undefined) result['min-uploaded-documents'] = el.minUploadedDocuments
-      if (el.maxUploadedDocuments) result['max-uploaded-documents'] = el.maxUploadedDocuments
       if (el.allowedMimeTypes && el.allowedMimeTypes.length > 0) result['allowed-mime-types'] = el.allowedMimeTypes
       if (el.enabled !== undefined) result.enabled = el.enabled
       if (el.visible !== undefined) result.visible = el.visible
@@ -421,9 +427,11 @@ function mapElement(el: AnyElement, si: number, ei: number, currentScreen?: Scre
       if (el.action === 'navigate') {
         const payload: Record<string, string> = {}
         
-        // Collect form fields from current screen
+        // Collect form fields from current screen (exclude Footer itself)
         if (currentScreen) {
-          const currentScreenFormFields = currentScreen.elements.filter((elem: any) => 'name' in elem && elem.name)
+          const currentScreenFormFields = currentScreen.elements.filter((elem: any) => 
+            'name' in elem && elem.name && elem.type !== 'Footer'
+          )
           currentScreenFormFields.forEach((field: any) => {
             if ('name' in field && field.name) {
               payload[field.name] = `\${form.${field.name}}`
@@ -442,9 +450,11 @@ function mapElement(el: AnyElement, si: number, ei: number, currentScreen?: Scre
       } else if (el.action === 'complete') {
         const payload: Record<string, string> = {}
         
-        // Collect form fields from current screen
+        // Collect form fields from current screen (exclude Footer itself)
         if (currentScreen) {
-          const currentScreenFormFields = currentScreen.elements.filter((elem: any) => 'name' in elem && elem.name)
+          const currentScreenFormFields = currentScreen.elements.filter((elem: any) => 
+            'name' in elem && elem.name && elem.type !== 'Footer'
+          )
           currentScreenFormFields.forEach((field: any) => {
             if ('name' in field && field.name) {
               payload[field.name] = `\${form.${field.name}}`
@@ -452,12 +462,12 @@ function mapElement(el: AnyElement, si: number, ei: number, currentScreen?: Scre
           })
         }
         
-        // Collect data from previous screens
+        // Collect data from previous screens (exclude Footer)
         if (allScreens) {
           for (let i = 0; i < si; i++) {
             const prevScreen = allScreens[i]
             prevScreen.elements.forEach((elem: any) => {
-              if ('name' in elem && elem.name) {
+              if ('name' in elem && elem.name && elem.type !== 'Footer') {
                 payload[elem.name] = `\${data.${elem.name}}`
               }
             })
