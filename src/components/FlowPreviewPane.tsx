@@ -14,6 +14,14 @@ interface FlowAsset {
   version?: string
   routing_model?: any
   data_api_version?: string
+  _note?: string
+  _flowInfo?: {
+    preview?: {
+      preview_url?: string
+    }
+    [key: string]: any
+  }
+  [key: string]: any
 }
 
 export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPreviewPaneProps) {
@@ -34,15 +42,20 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
       const service = new WhatsAppService()
       const asset = await service.getFlowAsset(flowId)
       
-      if (asset && asset.screens) {
+      console.log('Loaded flow asset:', asset)
+      
+      if (asset) {
         setFlowAsset(asset)
-        setSelectedScreen(0)
+        if (asset.screens && asset.screens.length > 0) {
+          setSelectedScreen(0)
+        }
       } else {
-        setError('No flow data available')
+        setError('No flow data available. The flow may be empty or not yet configured.')
       }
     } catch (err) {
       console.error('Error loading flow asset:', err)
-      setError(err instanceof Error ? err.message : 'Failed to load flow preview')
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load flow preview'
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -219,29 +232,45 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                 Retry
               </button>
             </div>
-          ) : flowAsset && flowAsset.screens && flowAsset.screens.length > 0 ? (
+          ) : flowAsset ? (
             <div>
-              {/* Screen Tabs */}
-              {flowAsset.screens.length > 1 && (
-                <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
-                  {flowAsset.screens.map((screen: any, index: number) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedScreen(index)}
-                      className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-all ${
-                        selectedScreen === index
-                          ? 'bg-primary-600 text-white shadow-md'
-                          : 'bg-white text-gray-700 border border-gray-200 hover:border-primary-300'
-                      }`}
-                    >
-                      {screen.title || `Screen ${index + 1}`}
-                    </button>
-                  ))}
+              {/* Check if flow has screens */}
+              {flowAsset.screens && flowAsset.screens.length > 0 ? (
+                <>
+                  {/* Screen Tabs */}
+                  {flowAsset.screens.length > 1 && (
+                    <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
+                      {flowAsset.screens.map((screen: any, index: number) => (
+                        <button
+                          key={index}
+                          onClick={() => setSelectedScreen(index)}
+                          className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-all ${
+                            selectedScreen === index
+                              ? 'bg-primary-600 text-white shadow-md'
+                              : 'bg-white text-gray-700 border border-gray-200 hover:border-primary-300'
+                          }`}
+                        >
+                          {screen.title || `Screen ${index + 1}`}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Selected Screen Preview */}
+                  {renderScreenPreview(flowAsset.screens[selectedScreen])}
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 bg-white rounded-lg border border-gray-200">
+                  <AlertCircle className="w-12 h-12 text-yellow-500 mb-4" />
+                  <p className="text-gray-900 font-medium mb-2">No screens configured yet</p>
+                  <p className="text-sm text-gray-600 mb-4 text-center max-w-md">
+                    This flow doesn't have any screens yet. You can add screens in WhatsApp Business Manager.
+                  </p>
+                  {flowAsset._note && (
+                    <p className="text-xs text-gray-500 mt-2">{flowAsset._note}</p>
+                  )}
                 </div>
               )}
-
-              {/* Selected Screen Preview */}
-              {renderScreenPreview(flowAsset.screens[selectedScreen])}
 
               {/* Flow Info */}
               <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
@@ -253,19 +282,32 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Total Screens:</span>
-                    <span className="font-medium text-gray-900">{flowAsset.screens.length}</span>
+                    <span className="font-medium text-gray-900">{flowAsset.screens?.length || 0}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Data API Version:</span>
                     <span className="font-medium text-gray-900">{flowAsset.data_api_version || 'N/A'}</span>
                   </div>
+                  {flowAsset._flowInfo?.preview?.preview_url && (
+                    <div className="pt-2 border-t border-gray-200">
+                      <a
+                        href={flowAsset._flowInfo.preview.preview_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-600 hover:text-primary-700 text-sm flex items-center gap-1"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        View in WhatsApp Preview
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full">
               <AlertCircle className="w-12 h-12 text-gray-400 mb-4" />
-              <p className="text-gray-600 font-medium">No screens found in this flow</p>
+              <p className="text-gray-600 font-medium">No flow data available</p>
             </div>
           )}
         </div>

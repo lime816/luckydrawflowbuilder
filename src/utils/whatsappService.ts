@@ -903,7 +903,8 @@ export class WhatsAppService {
     try {
       console.log(`Fetching flow asset (JSON) for ${flowId}...`);
       
-      const response = await fetch(`https://graph.facebook.com/v22.0/${flowId}/assets`, {
+      // Method 1: Try to get assets directly
+      let response = await fetch(`https://graph.facebook.com/v22.0/${flowId}/assets`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${this.accessToken}`,
@@ -912,31 +913,81 @@ export class WhatsAppService {
       });
 
       if (!response.ok) {
+        console.warn('Direct asset fetch failed, trying alternative method...');
+        
+        // Method 2: Try getting flow details with fields parameter
+        response = await fetch(`https://graph.facebook.com/v22.0/${flowId}?fields=id,name,status,categories,validation_errors,json_version,data_api_version,endpoint_uri,preview`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${this.accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
+
+      if (!response.ok) {
         const errorData = await response.json();
         console.error('Failed to fetch flow asset:', errorData);
-        throw new Error(`Failed to fetch flow asset: ${errorData.error?.message || JSON.stringify(errorData)}`);
+        
+        // Provide more helpful error message
+        if (errorData.error?.code === 100) {
+          throw new Error('Invalid flow ID or insufficient permissions to access flow assets');
+        } else if (errorData.error?.code === 190) {
+          throw new Error('Access token expired or invalid. Please check your WhatsApp API credentials');
+        }
+        
+        throw new Error(`Failed to fetch flow asset: ${errorData.error?.message || 'Unknown error'}`);
       }
 
       const result = await response.json();
-      console.log('Flow asset retrieved successfully');
+      console.log('Flow data retrieved:', result);
       
-      // The API returns the asset data in the 'data' array
-      if (result.data && result.data.length > 0) {
-        // Get the latest asset
+      // Handle different response formats
+      
+      // Format 1: Direct asset data in 'data' array
+      if (result.data && Array.isArray(result.data) && result.data.length > 0) {
         const latestAsset = result.data[0];
         
-        // Parse the asset if it's a string
         if (typeof latestAsset.asset === 'string') {
-          return JSON.parse(latestAsset.asset);
+          try {
+            return JSON.parse(latestAsset.asset);
+          } catch (e) {
+            console.error('Failed to parse asset string:', e);
+            return latestAsset;
+          }
         }
         
         return latestAsset.asset || latestAsset;
       }
       
-      throw new Error('No asset data found for this flow');
+      // Format 2: Flow details with preview URL
+      if (result.preview && result.preview.preview_url) {
+        console.log('Flow has preview URL:', result.preview.preview_url);
+        // For now, return basic flow info since we can't directly parse preview
+        return {
+          screens: [],
+          version: result.json_version || '3.0',
+          data_api_version: result.data_api_version || '3.0',
+          _note: 'Preview available at: ' + result.preview.preview_url,
+          _flowInfo: result
+        };
+      }
+      
+      // Format 3: Check if result itself contains screens
+      if (result.screens) {
+        return result;
+      }
+      
+      console.error('Unexpected response format:', result);
+      throw new Error('Flow asset data not found. The flow may not have any screens configured yet, or the asset format is not supported.');
     } catch (error) {
       console.error('Error fetching flow asset:', error);
-      throw error;
+      
+      if (error instanceof Error) {
+        throw error;
+      }
+      
+      throw new Error('Failed to load flow preview. Please ensure the flow has been properly configured with screens.');
     }
   }
 
