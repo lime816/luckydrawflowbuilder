@@ -126,8 +126,11 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                     </div>
                     
                     {/* Text Elements */}
-                    {child.text && (
+                    {child.text && typeof child.text === 'string' && (
                       <p className="text-sm text-gray-800">{child.text}</p>
+                    )}
+                    {child.text && typeof child.text === 'object' && (
+                      <p className="text-sm text-gray-800">{JSON.stringify(child.text)}</p>
                     )}
                     
                     {/* Input Elements */}
@@ -135,11 +138,11 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                       <div className="mt-2">
                         <input
                           type="text"
-                          placeholder={child.label || 'Input field'}
+                          placeholder={typeof child.label === 'string' ? child.label : 'Input field'}
                           className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
                           disabled
                         />
-                        {child['helper-text'] && (
+                        {child['helper-text'] && typeof child['helper-text'] === 'string' && (
                           <p className="text-xs text-gray-500 mt-1">{child['helper-text']}</p>
                         )}
                       </div>
@@ -149,9 +152,9 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                     {child.type === 'Dropdown' && (
                       <div className="mt-2">
                         <select className="w-full px-3 py-2 border border-gray-300 rounded text-sm" disabled>
-                          <option>{child.label || 'Select option'}</option>
+                          <option>{typeof child.label === 'string' ? child.label : 'Select option'}</option>
                           {child['data-source']?.map((option: any, i: number) => (
-                            <option key={i}>{option.title}</option>
+                            <option key={i}>{typeof option.title === 'string' ? option.title : option.id || 'Option'}</option>
                           ))}
                         </select>
                       </div>
@@ -163,7 +166,7 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                         {child['data-source']?.map((option: any, i: number) => (
                           <label key={i} className="flex items-center gap-2 text-sm">
                             <input type="checkbox" disabled />
-                            <span>{option.title}</span>
+                            <span>{typeof option.title === 'string' ? option.title : option.id || 'Option'}</span>
                           </label>
                         ))}
                       </div>
@@ -175,7 +178,7 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                         {child['data-source']?.map((option: any, i: number) => (
                           <label key={i} className="flex items-center gap-2 text-sm">
                             <input type="radio" name={child.name} disabled />
-                            <span>{option.title}</span>
+                            <span>{typeof option.title === 'string' ? option.title : option.id || 'Option'}</span>
                           </label>
                         ))}
                       </div>
@@ -185,7 +188,7 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                     {child.type === 'Footer' && (
                       <div className="mt-2">
                         <button className="w-full px-4 py-2 bg-primary-600 text-white rounded text-sm font-medium">
-                          {child.label || 'Continue'}
+                          {typeof child.label === 'string' ? child.label : 'Continue'}
                         </button>
                       </div>
                     )}
