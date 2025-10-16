@@ -345,6 +345,38 @@ function mapElement(el: AnyElement, si: number, ei: number, currentScreen?: Scre
       if (el.scaleType) result['scale-type'] = el.scaleType
       return result
     }
+    case 'PhotoPicker': {
+      const result: any = { 
+        type: 'PhotoPicker', 
+        name: el.name,
+        label: el.label
+      }
+      if (el.description) result.description = el.description
+      if (el.photoSource) result['photo-source'] = el.photoSource
+      if (el.maxFileSizeKb) result['max-file-size-kb'] = el.maxFileSizeKb
+      if (el.minUploadedPhotos !== undefined) result['min-uploaded-photos'] = el.minUploadedPhotos
+      if (el.maxUploadedPhotos) result['max-uploaded-photos'] = el.maxUploadedPhotos
+      if (el.enabled !== undefined) result.enabled = el.enabled
+      if (el.visible !== undefined) result.visible = el.visible
+      if (el.errorMessage) result['error-message'] = el.errorMessage
+      return result
+    }
+    case 'DocumentPicker': {
+      const result: any = { 
+        type: 'DocumentPicker', 
+        name: el.name,
+        label: el.label
+      }
+      if (el.description) result.description = el.description
+      if (el.maxFileSizeKb) result['max-file-size-kb'] = el.maxFileSizeKb
+      if (el.minUploadedDocuments !== undefined) result['min-uploaded-documents'] = el.minUploadedDocuments
+      if (el.maxUploadedDocuments) result['max-uploaded-documents'] = el.maxUploadedDocuments
+      if (el.allowedMimeTypes && el.allowedMimeTypes.length > 0) result['allowed-mime-types'] = el.allowedMimeTypes
+      if (el.enabled !== undefined) result.enabled = el.enabled
+      if (el.visible !== undefined) result.visible = el.visible
+      if (el.errorMessage) result['error-message'] = el.errorMessage
+      return result
+    }
     case 'NavigationList': {
       const result: any = { 
         type: 'NavigationList', 

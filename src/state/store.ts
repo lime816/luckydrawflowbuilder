@@ -259,6 +259,30 @@ function createDefaultElement(type: ElementType): AnyElement {
         { src: '/t1.png', altText: 'Local sample 1' },
         { src: '/t2.png', altText: 'Local sample 2' }
       ] }
+    case 'PhotoPicker':
+      return { 
+        id, 
+        type, 
+        name: 'photo_picker', 
+        label: 'Upload Photos',
+        description: 'Select photos from your gallery or take new ones',
+        photoSource: 'camera_gallery',
+        maxFileSizeKb: 10240,
+        minUploadedPhotos: 0,
+        maxUploadedPhotos: 10
+      }
+    case 'DocumentPicker':
+      return { 
+        id, 
+        type, 
+        name: 'document_picker', 
+        label: 'Upload Documents',
+        description: 'Select documents to upload',
+        maxFileSizeKb: 10240,
+        minUploadedDocuments: 0,
+        maxUploadedDocuments: 10,
+        allowedMimeTypes: ['application/pdf', 'image/jpeg', 'image/png']
+      }
     case 'NavigationList':
       return { id, type, name: 'navigation_list', listItems: [
         { 

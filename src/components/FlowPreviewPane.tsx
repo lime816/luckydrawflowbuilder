@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Eye, Loader, AlertCircle, ExternalLink, Code2 } from 'lucide-react'
 import { WhatsAppService } from '../utils/whatsappService'
+import type { ElementType } from '../types'
 
 interface FlowPreviewPaneProps {
   flowId: string
@@ -138,8 +139,11 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                     {/* Input Elements */}
                     {(child.type === 'TextInput' || child.type === 'EmailInput' || child.type === 'PhoneInput') && (
                       <div className="mt-2">
+                        {child.label && typeof child.label === 'string' && (
+                          <label className="block text-sm font-medium text-gray-700 mb-1">{child.label}</label>
+                        )}
                         <input
-                          type="text"
+                          type={child.type === 'EmailInput' ? 'email' : child.type === 'PhoneInput' ? 'tel' : 'text'}
                           placeholder={typeof child.label === 'string' ? child.label : 'Input field'}
                           className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
                           disabled
@@ -147,42 +151,198 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                         {child['helper-text'] && typeof child['helper-text'] === 'string' && (
                           <p className="text-xs text-gray-500 mt-1">{child['helper-text']}</p>
                         )}
+                        {child.required && (
+                          <p className="text-xs text-red-500 mt-1">* Required</p>
+                        )}
                       </div>
                     )}
                     
                     {/* Dropdown */}
                     {child.type === 'Dropdown' && (
                       <div className="mt-2">
+                        {child.label && typeof child.label === 'string' && (
+                          <label className="block text-sm font-medium text-gray-700 mb-1">{child.label}</label>
+                        )}
                         <select className="w-full px-3 py-2 border border-gray-300 rounded text-sm" disabled>
-                          <option>{typeof child.label === 'string' ? child.label : 'Select option'}</option>
+                          <option>Select an option</option>
                           {child['data-source']?.map((option: any, i: number) => (
                             <option key={i}>{typeof option.title === 'string' ? option.title : option.id || 'Option'}</option>
                           ))}
                         </select>
+                        {child.required && (
+                          <p className="text-xs text-red-500 mt-1">* Required</p>
+                        )}
                       </div>
                     )}
                     
                     {/* CheckboxGroup */}
                     {child.type === 'CheckboxGroup' && (
-                      <div className="mt-2 space-y-2">
-                        {child['data-source']?.map((option: any, i: number) => (
-                          <label key={i} className="flex items-center gap-2 text-sm">
-                            <input type="checkbox" disabled />
-                            <span>{typeof option.title === 'string' ? option.title : option.id || 'Option'}</span>
-                          </label>
-                        ))}
+                      <div className="mt-2">
+                        {child.label && typeof child.label === 'string' && (
+                          <p className="text-sm font-medium text-gray-700 mb-2">{child.label}</p>
+                        )}
+                        <div className="space-y-2">
+                          {child['data-source']?.map((option: any, i: number) => (
+                            <label key={i} className="flex items-center gap-2 text-sm">
+                              <input type="checkbox" disabled />
+                              <span>{typeof option.title === 'string' ? option.title : option.id || 'Option'}</span>
+                            </label>
+                          ))}
+                        </div>
+                        {child.required && (
+                          <p className="text-xs text-red-500 mt-1">* Required</p>
+                        )}
                       </div>
                     )}
                     
                     {/* RadioButtonsGroup */}
                     {child.type === 'RadioButtonsGroup' && (
-                      <div className="mt-2 space-y-2">
-                        {child['data-source']?.map((option: any, i: number) => (
-                          <label key={i} className="flex items-center gap-2 text-sm">
-                            <input type="radio" name={child.name} disabled />
-                            <span>{typeof option.title === 'string' ? option.title : option.id || 'Option'}</span>
-                          </label>
-                        ))}
+                      <div className="mt-2">
+                        {child.label && typeof child.label === 'string' && (
+                          <p className="text-sm font-medium text-gray-700 mb-2">{child.label}</p>
+                        )}
+                        <div className="space-y-2">
+                          {child['data-source']?.map((option: any, i: number) => (
+                            <label key={i} className="flex items-center gap-2 text-sm">
+                              <input type="radio" name={child.name} disabled />
+                              <span>{typeof option.title === 'string' ? option.title : option.id || 'Option'}</span>
+                            </label>
+                          ))}
+                        </div>
+                        {child.required && (
+                          <p className="text-xs text-red-500 mt-1">* Required</p>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Image Component */}
+                    {child.type === 'Image' && (
+                      <div className="mt-2">
+                        {child.src && typeof child.src === 'string' ? (
+                          <img
+                            src={child.src}
+                            alt={typeof child['alt-text'] === 'string' ? child['alt-text'] : 'Image'}
+                            className={`rounded ${child['scale-type'] === 'cover' ? 'object-cover' : 'object-contain'}`}
+                            style={{
+                              width: child.width ? `${child.width}px` : '100%',
+                              height: child.height ? `${child.height}px` : 'auto',
+                              aspectRatio: child['aspect-ratio'] || 'auto'
+                            }}
+                          />
+                        ) : (
+                          <div className="bg-gray-100 rounded p-4 text-center text-gray-500 text-sm">
+                            📷 Image: {typeof child.src === 'object' ? JSON.stringify(child.src) : 'No source'}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Image Carousel */}
+                    {child.type === 'ImageCarousel' && (
+                      <div className="mt-2">
+                        <div className="relative bg-gray-50 rounded-lg p-4 border border-gray-200">
+                          <p className="text-xs font-semibold text-gray-600 mb-2">📸 Image Carousel</p>
+                          {child.images && Array.isArray(child.images) && child.images.length > 0 ? (
+                            <div className="flex gap-2 overflow-x-auto pb-2">
+                              {child.images.map((img: any, i: number) => (
+                                <div key={i} className="flex-shrink-0">
+                                  {img.src && typeof img.src === 'string' ? (
+                                    <img
+                                      src={img.src}
+                                      alt={typeof img['alt-text'] === 'string' ? img['alt-text'] : `Image ${i + 1}`}
+                                      className={`rounded ${child['scale-type'] === 'cover' ? 'object-cover' : 'object-contain'}`}
+                                      style={{
+                                        width: '200px',
+                                        height: '150px',
+                                        aspectRatio: child['aspect-ratio'] || '4/3'
+                                      }}
+                                    />
+                                  ) : (
+                                    <div className="w-[200px] h-[150px] bg-gray-200 rounded flex items-center justify-center text-gray-500 text-xs">
+                                      Image {i + 1}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-500">No images in carousel</p>
+                          )}
+                          <p className="text-xs text-gray-400 mt-2">← Swipe to view more →</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* PhotoPicker (Media Upload) */}
+                    {child.type === 'PhotoPicker' && (
+                      <div className="mt-2">
+                        {child.label && typeof child.label === 'string' && (
+                          <label className="block text-sm font-medium text-gray-700 mb-1">{child.label}</label>
+                        )}
+                        {child.description && typeof child.description === 'string' && (
+                          <p className="text-xs text-gray-600 mb-2">{child.description}</p>
+                        )}
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50">
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                              <span className="text-2xl">📷</span>
+                            </div>
+                            <p className="text-sm font-medium text-gray-700">Upload Photos</p>
+                            <p className="text-xs text-gray-500">
+                              {child['photo-source'] === 'camera' ? 'Take a photo' : 
+                               child['photo-source'] === 'gallery' ? 'Select from gallery' : 
+                               'Camera or Gallery'}
+                            </p>
+                            {child['max-file-size-kb'] && (
+                              <p className="text-xs text-gray-400">Max size: {child['max-file-size-kb']} KB</p>
+                            )}
+                            {(child['min-uploaded-photos'] || child['max-uploaded-photos']) && (
+                              <p className="text-xs text-gray-400">
+                                {child['min-uploaded-photos'] || 0} - {child['max-uploaded-photos'] || 30} photos
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        {child['min-uploaded-photos'] > 0 && (
+                          <p className="text-xs text-red-500 mt-1">* Required (min {child['min-uploaded-photos']} photos)</p>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* DocumentPicker */}
+                    {child.type === 'DocumentPicker' && (
+                      <div className="mt-2">
+                        {child.label && typeof child.label === 'string' && (
+                          <label className="block text-sm font-medium text-gray-700 mb-1">{child.label}</label>
+                        )}
+                        {child.description && typeof child.description === 'string' && (
+                          <p className="text-xs text-gray-600 mb-2">{child.description}</p>
+                        )}
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50">
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                              <span className="text-2xl">📄</span>
+                            </div>
+                            <p className="text-sm font-medium text-gray-700">Upload Documents</p>
+                            {child['allowed-mime-types'] && Array.isArray(child['allowed-mime-types']) && (
+                              <p className="text-xs text-gray-500">
+                                Allowed: {child['allowed-mime-types'].slice(0, 3).join(', ')}
+                                {child['allowed-mime-types'].length > 3 && '...'}
+                              </p>
+                            )}
+                            {child['max-file-size-kb'] && (
+                              <p className="text-xs text-gray-400">Max size: {child['max-file-size-kb']} KB</p>
+                            )}
+                            {(child['min-uploaded-documents'] || child['max-uploaded-documents']) && (
+                              <p className="text-xs text-gray-400">
+                                {child['min-uploaded-documents'] || 0} - {child['max-uploaded-documents'] || 30} documents
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        {child['min-uploaded-documents'] > 0 && (
+                          <p className="text-xs text-red-500 mt-1">* Required (min {child['min-uploaded-documents']} documents)</p>
+                        )}
                       </div>
                     )}
                     
@@ -196,7 +356,7 @@ export default function FlowPreviewPane({ flowId, flowName, onClose }: FlowPrevi
                     )}
                     
                     {/* Unknown/Other Components - Show raw data */}
-                    {!['TextBody', 'TextHeading', 'TextSubheading', 'TextInput', 'EmailInput', 'PhoneInput', 'Dropdown', 'CheckboxGroup', 'RadioButtonsGroup', 'Footer', 'Image', 'EmbeddedLink'].includes(child.type) && (
+                    {!['TextBody', 'TextHeading', 'TextSubheading', 'TextCaption', 'RichText', 'TextInput', 'EmailInput', 'PasswordInput', 'PhoneInput', 'TextArea', 'Dropdown', 'CheckboxGroup', 'RadioButtonsGroup', 'ChipsSelector', 'OptIn', 'Footer', 'Image', 'ImageCarousel', 'PhotoPicker', 'DocumentPicker', 'EmbeddedLink', 'DatePicker', 'CalendarPicker', 'NavigationList'].includes(child.type) && (
                       <div className="mt-2 p-2 bg-gray-50 rounded">
                         <p className="text-xs text-gray-600 mb-1">Component Properties:</p>
                         <pre className="text-xs text-gray-700 overflow-x-auto">{JSON.stringify(child, null, 2)}</pre>
