@@ -4,6 +4,6 @@ node_modules
 /.vite
 *.log
 .env
-
+.env.local
 # Local backend folder (using Railway deployment instead)
 /backend
